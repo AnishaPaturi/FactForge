@@ -169,7 +169,7 @@ backend/
 ### 1️⃣ Clone the Repository
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/factforge-backend.git
+git clone https://github.com/AnishaPaturi/FactForge.git
 cd factforge-backend/backend
 ```
 
@@ -190,6 +190,7 @@ Create a `.env` file:
 ```env
 OPENROUTER_API_KEY=your_key
 TAVILY_API_KEY=your_key
+REACT_APP_API_URL=https://factforge-api.onrender.com
 ```
 
 ---
@@ -290,9 +291,9 @@ Covers:
 
 ## 👩‍💻 Team
 
-* **Anisha** – Backend & LLM Integration
-* **Jayashree** – Frontend
-* **Sravani** – Search & Orchestration
+* **Anisha** 
+* **Sravani** 
+* **Jayashree** 
 
 ---
 
