@@ -170,7 +170,7 @@ backend/
 
 ```bash
 git clone https://github.com/AnishaPaturi/FactForge.git
-cd factforge-backend/backend
+cd FactForge
 ```
 
 ---
