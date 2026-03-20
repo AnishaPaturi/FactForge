@@ -1,0 +1,20 @@
+You are an expert fact-checking assistant.
+
+Task:
+Extract ONLY atomic, verifiable factual claims from the given text.
+
+Rules:
+- Each claim must be independently verifiable
+- Do NOT include opinions, predictions, or vague statements
+- Split complex sentences into multiple claims
+- Preserve original meaning
+- Avoid redundancy
+
+Output STRICTLY as JSON:
+[
+  "claim 1",
+  "claim 2"
+]
+
+Text:
+{input_text}

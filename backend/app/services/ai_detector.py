@@ -1,13 +1,20 @@
 import json
 from app.core.config import OPENROUTER_API_KEY, OPENROUTER_BASE_URL, MODEL_NAME
-from app.utils.helpers import load_prompt, safe_request
+from app.utils.helpers import safe_request
 
-def verify_claim(claim: str, evidence: list):
-    template = load_prompt("app/prompts/verification_prompt.txt")
+def detect_ai(text: str):
+    prompt = f"""
+Analyze the following text and estimate probability that it was AI-generated.
 
-    prompt = template.replace("{claim}", claim).replace(
-        "{evidence}", str(evidence)
-    )
+Return JSON:
+{{
+  "ai_probability": 0-100,
+  "reason": ""
+}}
+
+Text:
+{text}
+"""
 
     response = safe_request(
         f"{OPENROUTER_BASE_URL}/chat/completions",
@@ -22,19 +29,11 @@ def verify_claim(claim: str, evidence: list):
     )
 
     if not response:
-        return {
-            "verdict": "Unverifiable",
-            "confidence": 0,
-            "explanation": "Verification failed (API error)"
-        }
+        return {"ai_probability": 50, "reason": "Detection failed"}
 
     content = response["choices"][0]["message"]["content"]
 
     try:
         return json.loads(content)
     except:
-        return {
-            "verdict": "Unverifiable",
-            "confidence": 50,
-            "explanation": content
-        }
+        return {"ai_probability": 50, "reason": content}

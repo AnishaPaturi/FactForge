@@ -11,15 +11,19 @@ def search_claim(claim: str):
         "max_results": 3,
     }
 
-    res = requests.post(url, json=payload)
-    data = res.json()
+    try:
+        res = requests.post(url, json=payload)
+        data = res.json()
 
-    results = []
-    for r in data.get("results", []):
-        results.append({
-            "title": r.get("title"),
-            "url": r.get("url"),
-            "snippet": r.get("content"),
-        })
+        results = []
+        for r in data.get("results", []):
+            results.append({
+                "title": r.get("title"),
+                "url": r.get("url"),
+                "snippet": r.get("content"),
+            })
 
-    return results
+        return results
+
+    except:
+        return []
