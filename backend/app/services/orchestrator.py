@@ -2,6 +2,7 @@ from app.services.claim_extractor import extract_claims
 from app.services.search_service import search_claim
 from app.services.verifier import verify_claim
 from app.services.ai_detector import detect_ai
+from app.services.db_service import save_result
 
 def run_pipeline(text: str):
     ai_score = detect_ai(text)
@@ -33,7 +34,11 @@ def run_pipeline(text: str):
             "sources": evidence
         })
 
-    return {
+    final_output = {
         "ai_detection": ai_score,
         "claims": results
     }
+
+    save_result(text, final_output)
+
+    return final_output
