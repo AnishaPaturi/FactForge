@@ -1,0 +1,1 @@
+LABELS = ["True", "False", "Partially True", "Unverifiable"]
