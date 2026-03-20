@@ -1,4 +1,5 @@
 import json
+import re
 from app.core.config import OPENROUTER_API_KEY, OPENROUTER_BASE_URL, MODEL_NAME
 from app.utils.helpers import load_prompt, safe_request
 
@@ -28,10 +29,25 @@ def verify_claim(claim: str, evidence: list):
             "explanation": "Verification failed (API error)"
         }
 
+   
+
     content = response["choices"][0]["message"]["content"]
 
     try:
-        return json.loads(content)
+        # Extract JSON even if wrapped in ```json ```
+        json_match = re.search(r'\{.*\}', content, re.DOTALL)
+        
+        if json_match:
+            parsed = json.loads(json_match.group())
+            
+            return {
+                "verdict": parsed.get("verdict", "Unverifiable"),
+                "confidence": parsed.get("confidence", 50),
+                "explanation": parsed.get("explanation", "")
+            }
+        else:
+            raise Exception("No JSON found")
+
     except:
         return {
             "verdict": "Unverifiable",

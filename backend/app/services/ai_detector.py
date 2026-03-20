@@ -6,6 +6,7 @@ from app.utils.helpers import safe_request
 def detect_ai(text: str):
     prompt = f"""
 Analyze the following text and estimate probability that it was AI-generated.
+Be conservative. If unsure, return 40-60 range.
 
 Return JSON:
 {{

@@ -10,6 +10,7 @@ def run_pipeline(text: str):
     results = []
 
     for claim in claims:
+        claim = claim.strip().rstrip(".")
         evidence = search_claim(claim)
 
         if not evidence:
