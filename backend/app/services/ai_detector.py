@@ -1,4 +1,5 @@
 import json
+import re
 from app.core.config import OPENROUTER_API_KEY, OPENROUTER_BASE_URL, MODEL_NAME
 from app.utils.helpers import safe_request
 
@@ -34,6 +35,10 @@ Text:
     content = response["choices"][0]["message"]["content"]
 
     try:
-        return json.loads(content)
+        json_match = re.search(r'\{.*\}', content, re.DOTALL)
+        if json_match:
+            return json.loads(json_match.group())
+        else:
+            return {"ai_probability": 50, "reason": content}
     except:
         return {"ai_probability": 50, "reason": content}
