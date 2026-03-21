@@ -60,16 +60,18 @@ def classify_source_stance(claim: str, evidence: list):
     prompt = f"""
 Claim: {claim}
 
-You must classify each source STRICTLY:
+You MUST classify each source STRICTLY:
 
-- If source supports claim → Agree
-- If source contradicts or proves claim false → Disagree
-- Use Neutral ONLY if unrelated
+RULES:
+- Supports claim → Agree
+- Contradicts / says false / myth → Disagree
+- Neutral ONLY if completely unrelated
 
-IMPORTANT:
-If source says claim is false → Disagree
+STRICT:
+- If text says "myth", "false", "incorrect", "not true" → Disagree
+- DO NOT overuse Neutral
 
-Return ONLY:
+Return ONLY valid JSON:
 ["Agree", "Disagree", "Agree"]
 
 NO explanation.
@@ -78,7 +80,11 @@ Sources:
 """
 
     for i, src in enumerate(evidence):
-        content = src.get("snippet", "") or src.get("content", "")
+        content = " ".join([
+            src.get("title", ""),
+            src.get("snippet", ""),
+            src.get("content", "")
+        ])
         prompt += f"\n{i+1}. {content}\n"
 
     response = safe_request(
@@ -106,6 +112,7 @@ Sources:
             return ["Neutral"] * len(evidence)
 
         return result
+
     except:
         return ["Neutral"] * len(evidence)
 

@@ -29,25 +29,38 @@ def run_pipeline(text: str):
 
         verification = verify_claim(claim, evidence)
 
-        # 🔥 STEP 1: GET STANCES
+        # 🔥 STEP 1: GET RAW STANCES
         raw_stances = classify_source_stance(claim, evidence)
 
+        # 🔥 STEP 2: STRONG HYBRID CLEANING
         cleaned_stances = []
 
-        for i in range(len(evidence)):
-            content = (
-                evidence[i].get("snippet") 
-                or evidence[i].get("content") 
-                or ""
-            ).lower()
+        negative_keywords = [
+            "myth", "false", "not visible", "cannot be seen",
+            "not true", "incorrect", "no evidence", "debunked",
+            "misconception", "not possible", "never"
+        ]
 
-            # 🔥 KEYWORD-BASED OVERRIDE (SMART FIX)
-            if any(word in content for word in ["myth", "not true", "false", "untrue", "incorrect", "no evidence", "never"]):
+        positive_keywords = [
+            "true", "correct", "confirmed", "proven", "visible", "yes"
+        ]
+
+        for i in range(len(evidence)):
+            # 🔥 USE ALL AVAILABLE TEXT (BIG FIX)
+            content = " ".join([
+                evidence[i].get("title", ""),
+                evidence[i].get("snippet", ""),
+                evidence[i].get("content", "")
+            ]).lower()
+
+            # 🔥 RULE 1: KEYWORD OVERRIDE (STRONG)
+            if any(k in content for k in negative_keywords):
                 val = "Disagree"
-            elif any(word in content for word in ["true", "correct", "confirmed", "proven", "yes"]):
+            elif any(k in content for k in positive_keywords):
                 val = "Agree"
+
             else:
-                # fallback to LLM output
+                # 🔥 RULE 2: LLM FALLBACK
                 if raw_stances and i < len(raw_stances):
                     val = str(raw_stances[i]).strip().capitalize()
 
@@ -56,6 +69,13 @@ def run_pipeline(text: str):
                 else:
                     val = "Neutral"
 
+            # 🔥 RULE 3: FINAL SAFETY OVERRIDE
+            if val == "Neutral":
+                if any(k in content for k in negative_keywords):
+                    val = "Disagree"
+                elif any(k in content for k in positive_keywords):
+                    val = "Agree"
+
             cleaned_stances.append(val)
 
         stances = cleaned_stances
@@ -63,7 +83,7 @@ def run_pipeline(text: str):
         # 🔥 STEP 3: AGREEMENT
         agreement_data = compute_agreement_score(stances, evidence)
 
-        # 🔥 STEP 4: ATTACH STANCE TO SOURCES
+        # 🔥 STEP 4: FORMAT SOURCES
         formatted_sources = []
         for i, src in enumerate(evidence):
             formatted_sources.append({
