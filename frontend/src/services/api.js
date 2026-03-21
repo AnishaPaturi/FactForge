@@ -22,8 +22,17 @@ export const downloadPDF = async (data) => {
     },
     body: JSON.stringify(data),
   });
+  if (!response.ok) {
+      throw new Error("Failed to generate PDF");
+  }
 
   const blob = await response.blob();
+
+    // Optional: check if it's actually a PDF
+  if (blob.type !== "application/pdf") {
+      throw new Error("Invalid PDF response");
+  }
+
 
   const url = window.URL.createObjectURL(blob);
   const a = document.createElement("a");
