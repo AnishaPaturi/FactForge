@@ -138,8 +138,10 @@ def compute_agreement_score(stances: list, evidence: list):
 
     total_weight = weighted_agree + weighted_disagree + weighted_neutral
 
-    score = round((weighted_agree / total_weight) * 100, 2) if total_weight > 0 else None
-
+    score = round((weighted_agree / total_weight) * 100, 2) if total_weight > 0 else 0
+    
+    if agree_count == 0 and disagree_count > 0:
+        insight = "All sources contradict the claim"
     # 🔥 BONUS: Insight (demo killer)
     if score is None:
         insight = "No sufficient data"
