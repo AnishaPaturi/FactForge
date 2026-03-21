@@ -46,7 +46,7 @@ def search_claim(claim: str):
        
         results.sort(key=lambda x: x["score"], reverse=True)
 
-        return results[:3]
+        return results
 
     except Exception as e:
         print("Search error:", e)

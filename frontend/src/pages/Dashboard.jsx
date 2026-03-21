@@ -341,6 +341,150 @@
 
 
 
+// import { useState } from "react";
+// import Navbar from "../components/Navbar";
+// import InputBox from "../components/InputBox";
+// <<<<<<< HEAD
+// import ProgressStepper from "../components/ProgressStepper";
+// import SummaryStats from "../components/SummaryStats";
+// import AnalyticsPanel from "../components/AnalyticsPanel";
+// import ClaimsList from "../components/ClaimsList";
+// import Footer from "../components/Footer";
+// import { addSession } from "./HistoryStore";  // ← same folder
+// =======
+// import ResultCard from "../components/ResultCard";
+// import Loader from "../components/Loader";
+// import { analyzeText } from "../services/api";
+// import { downloadPDF } from "../services/api";
+// >>>>>>> 075452cdcc0fc0278e1d9348118ff89d9fffb089
+
+// export default function Dashboard() {
+//   const [claims, setClaims] = useState([]);
+//   const [step, setStep] = useState(0);
+
+//   const handleVerify = async (input) => {
+//     if (!input?.trim()) return;
+//     setStep(1);
+//     try {
+//       setStep(2);
+//       const response = await fetch("http://localhost:8000/analyze", {
+//         method: "POST",
+//         headers: { "Content-Type": "application/json" },
+//         body: JSON.stringify({ text: input })
+//       });
+//       const data = await response.json();
+//       setStep(3);
+
+// <<<<<<< HEAD
+//       if (Array.isArray(data.claims)) {
+//         setClaims(data.claims);
+//         addSession(input.trim(), data.claims); // ← save to history
+//       } else {
+//         setClaims([]);
+//       }
+// =======
+//       // 🔥 transform backend → frontend format
+//       const formatted = {
+//         aiProbability: data?.ai_detection?.ai_probability || 0,
+//         claims:
+//           data?.claims?.map((c, index) => ({
+//             id: index,
+//             claim: c.claim,
+//             verdict: mapVerdict(c.verdict),
+//             confidence: c.confidence,
+//             explanation: c.explanation,
+//             sources:
+//               c.sources?.map((s) => ({
+//                 label: s.label,
+//                 url: s.url,
+//                 score: s.score,
+//               })) || [],
+//           })) || [],
+//       };
+
+//       setResults(formatted);
+//       setUiState("results");
+// >>>>>>> 075452cdcc0fc0278e1d9348118ff89d9fffb089
+//     } catch (error) {
+//       console.error(error);
+//       setClaims([]);
+//     }
+//   };
+
+//   const stats = {
+//     total: claims.length,
+//     true: claims.filter((c) => c.verdict === "True").length,
+//     false: claims.filter((c) => c.verdict === "False").length,
+//     reliability:
+//       claims.length > 0
+//         ? Math.round(
+//             (claims.filter((c) => c.verdict === "True").length / claims.length) * 100
+//           )
+//         : 0
+//   };
+
+//   return (
+//     <div style={{ minHeight: "100vh", background: "#05090f" }}>
+//       <Navbar />
+// <<<<<<< HEAD
+//       <div className="container">
+//         <InputBox onVerify={handleVerify} />
+//         {step > 0 && <ProgressStepper step={step} />}
+//         {claims.length > 0 && (
+//           <>
+//             <SummaryStats stats={stats} />
+//             <AnalyticsPanel data={claims} />
+//             <ClaimsList claims={claims} />
+//           </>
+// =======
+
+//       <main className="max-w-3xl mx-auto p-6 space-y-5">
+//         {/* Header */}
+//         <div className="flex justify-between">
+//           <div>
+//             <h1 className="text-2xl font-bold">Fact Analyzer</h1>
+//             <p className="text-sm text-gray-400">
+//               Enter text and verify claims instantly
+//             </p>
+//           </div>
+
+//           {uiState === "results" && (
+//           <div className="flex gap-3">
+//             <button
+//               onClick={() => downloadPDF(results)}
+//               className="bg-green-600 text-white px-4 py-1 rounded hover:bg-green-700"
+//             >
+//               Download Report
+//             </button>
+
+//             <button
+//               onClick={handleReset}
+//               className="text-sm text-gray-300 border px-3 py-1 rounded"
+//             >
+//               New Analysis
+//             </button>
+//           </div>
+//         )}
+//         </div>
+
+//         {/* Input */}
+//         <InputBox onAnalyze={handleAnalyze} isLoading={uiState === "loading"} />
+
+//         {/* STATES */}
+//         {uiState === "loading" && <Loader />}
+
+//         {uiState === "empty" && (
+//           <div className="text-center text-gray-400">
+//             Enter text to analyze
+//           </div>
+// >>>>>>> 075452cdcc0fc0278e1d9348118ff89d9fffb089
+//         )}
+//       </div>
+//       <Footer />
+//     </div>
+//   );
+// }
+
 import { useState } from "react";
 import Navbar from "../components/Navbar";
 import InputBox from "../components/InputBox";
@@ -348,64 +492,180 @@ import ProgressStepper from "../components/ProgressStepper";
 import SummaryStats from "../components/SummaryStats";
 import AnalyticsPanel from "../components/AnalyticsPanel";
 import ClaimsList from "../components/ClaimsList";
+import Loader from "../components/Loader";
 import Footer from "../components/Footer";
-import { addSession } from "./HistoryStore";  // ← same folder
+import { addSession } from "./historyStore";
+import { downloadPDF } from "../services/api";
+
+// ─── Verdict normalizer ───────────────────────────────────────────
+const mapVerdict = (v = '') => {
+  const map = {
+    'True':           'true',
+    'False':          'false',
+    'Partially True': 'partial',
+  }
+  return map[v] ?? 'unverifiable'
+}
 
 export default function Dashboard() {
-  const [claims, setClaims] = useState([]);
-  const [step, setStep] = useState(0);
+  const [claims, setClaims]   = useState([]);
+  const [step, setStep]       = useState(0);
+  const [uiState, setUiState] = useState("empty"); // "empty" | "loading" | "results"
 
   const handleVerify = async (input) => {
     if (!input?.trim()) return;
+
+    setUiState("loading");
+    setClaims([]);
     setStep(1);
+
     try {
       setStep(2);
+
       const response = await fetch("http://localhost:8000/analyze", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ text: input })
       });
+
       const data = await response.json();
       setStep(3);
 
       if (Array.isArray(data.claims)) {
-        setClaims(data.claims);
-        addSession(input.trim(), data.claims); // ← save to history
+        // Normalise verdict casing for downstream components
+        const normalised = data.claims.map((c) => ({
+          ...c,
+          verdict: mapVerdict(c.verdict),
+        }));
+        setClaims(normalised);
+        addSession(input.trim(), data.claims); // save raw API data to history
+        setUiState("results");
       } else {
         setClaims([]);
+        setUiState("empty");
       }
     } catch (error) {
       console.error(error);
       setClaims([]);
+      setUiState("empty");
     }
+  };
+
+  const handleReset = () => {
+    setUiState("empty");
+    setClaims([]);
+    setStep(0);
   };
 
   const stats = {
     total: claims.length,
-    true: claims.filter((c) => c.verdict === "True").length,
-    false: claims.filter((c) => c.verdict === "False").length,
+    true:  claims.filter((c) => c.verdict === "true").length,
+    false: claims.filter((c) => c.verdict === "false").length,
     reliability:
       claims.length > 0
         ? Math.round(
-            (claims.filter((c) => c.verdict === "True").length / claims.length) * 100
+            (claims.filter((c) => c.verdict === "true").length / claims.length) * 100
           )
-        : 0
+        : 0,
   };
 
   return (
     <div style={{ minHeight: "100vh", background: "#05090f" }}>
       <Navbar />
+
       <div className="container">
+
+        {/* Page header */}
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+          <div>
+            <h1 style={{
+              fontFamily: "'Orbitron', sans-serif",
+              fontSize: "1.4rem",
+              fontWeight: 700,
+              color: "#e2f0ff",
+              letterSpacing: "0.04em",
+              marginBottom: 4,
+              textShadow: "0 0 30px rgba(0,200,255,0.2)"
+            }}>
+              Fact Analyzer
+            </h1>
+            <p style={{ fontSize: "0.8rem", color: "rgba(255,255,255,0.35)" }}>
+              Enter text and verify claims instantly
+            </p>
+          </div>
+
+          {uiState === "results" && (
+            <div style={{ display: "flex", gap: 10 }}>
+              <button
+                onClick={() => downloadPDF(claims)}
+                style={{
+                  padding: "7px 16px",
+                  borderRadius: 8,
+                  fontSize: "0.75rem",
+                  fontWeight: 600,
+                  background: "rgba(34,197,94,0.12)",
+                  border: "1px solid rgba(34,197,94,0.3)",
+                  color: "#4ade80",
+                  cursor: "pointer",
+                  fontFamily: "'Inter', sans-serif",
+                }}
+              >
+                Download Report
+              </button>
+              <button
+                onClick={handleReset}
+                style={{
+                  padding: "7px 16px",
+                  borderRadius: 8,
+                  fontSize: "0.75rem",
+                  fontWeight: 500,
+                  background: "rgba(255,255,255,0.04)",
+                  border: "1px solid rgba(255,255,255,0.1)",
+                  color: "rgba(255,255,255,0.5)",
+                  cursor: "pointer",
+                  fontFamily: "'Inter', sans-serif",
+                }}
+              >
+                New Analysis
+              </button>
+            </div>
+          )}
+        </div>
+
+        {/* Input */}
         <InputBox onVerify={handleVerify} />
-        {step > 0 && <ProgressStepper step={step} />}
-        {claims.length > 0 && (
+
+        {/* Progress stepper — only while processing */}
+        {step > 0 && uiState !== "empty" && <ProgressStepper step={step} />}
+
+        {/* Loading */}
+        {uiState === "loading" && <Loader />}
+
+        {/* Empty state */}
+        {uiState === "empty" && (
+          <div style={{
+            textAlign: "center",
+            padding: "3rem 1rem",
+            color: "rgba(255,255,255,0.22)",
+            fontFamily: "'Inter', sans-serif",
+            fontSize: "0.85rem",
+            letterSpacing: "0.04em",
+          }}>
+            Enter text above to start verifying claims
+          </div>
+        )}
+
+        {/* Results */}
+        {uiState === "results" && claims.length > 0 && (
           <>
             <SummaryStats stats={stats} />
             <AnalyticsPanel data={claims} />
             <ClaimsList claims={claims} />
           </>
         )}
+
       </div>
+
       <Footer />
     </div>
   );
