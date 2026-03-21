@@ -12,13 +12,13 @@ export default function ResultCard({
   const [expanded, setExpanded] = useState(true)
 
   return (
-    <div className="card border rounded p-4 mb-3">
+    <div className="card border rounded p-4 mb-4">
 
       {/* HEADER */}
       <div onClick={() => setExpanded(!expanded)} className="cursor-pointer">
         <p className="font-semibold">{claim}</p>
         <div className="flex gap-3 mt-1">
-          <span>{verdict}</span>
+          <span className="text-red-400">{verdict}</span>
           <span>{confidence}%</span>
         </div>
       </div>
@@ -34,7 +34,7 @@ export default function ResultCard({
             <div className="mb-3">
               <p className="text-xs mb-1">Agreement</p>
 
-              <div className="w-full bg-gray-300 h-2 rounded mb-2">
+              <div className="w-full bg-gray-700 h-2 rounded mb-2">
                 <div
                   className="bg-green-500 h-2 rounded"
                   style={{ width: `${source_analysis.agreement_score || 0}%` }}

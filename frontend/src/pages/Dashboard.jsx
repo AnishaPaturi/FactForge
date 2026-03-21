@@ -160,7 +160,16 @@ export default function Dashboard() {
             <AiDetectionBox probability={results.aiProbability} />
 
             {results.claims.map((claim, i) => (
-              <ResultCard key={claim.id} {...claim} index={i} />
+              <ResultCard
+                key={claim.id}
+                index={i}
+                claim={claim.claim}
+                verdict={claim.verdict?.toLowerCase()}
+                confidence={claim.confidence}
+                explanation={claim.explanation}
+                sources={claim.sources}
+                source_analysis={claim.source_analysis}   // 🔥 THIS FIXES EVERYTHING
+              />
             ))}
           </div>
         )}
