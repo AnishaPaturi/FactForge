@@ -5,7 +5,7 @@ import ResultCard from "../components/ResultCard";
 import Loader from "../components/Loader";
 import { analyzeText, downloadPDF } from "../services/api";
 
-// 🔥 AI Detection Box (UNCHANGED)
+// 🔥 AI Detection Box
 function AiDetectionBox({ probability }) {
   const pct = probability || 0;
   const level = pct >= 70 ? "high" : pct >= 40 ? "medium" : "low";
@@ -53,20 +53,35 @@ function AiDetectionBox({ probability }) {
   );
 }
 
-// 🔥 NEW: Topic + Warning Component
+// 🔥 NEW: Topic Warning Component
 function TopicWarning({ topic, warning }) {
   if (!warning || warning.level === "none") return null;
 
   const styles = {
-    high: "bg-red-500/10 border-red-500/30 text-red-300",
-    medium: "bg-yellow-500/10 border-yellow-500/30 text-yellow-300",
-    low: "bg-blue-500/10 border-blue-500/30 text-blue-300",
+    high: "bg-red-500/10 border-red-500/40 text-red-300",
+    medium: "bg-yellow-500/10 border-yellow-500/40 text-yellow-300",
+    low: "bg-blue-500/10 border-blue-500/40 text-blue-300",
+  };
+
+  const topicIcons = {
+    health: "🧬",
+    politics: "🏛️",
+    technology: "💻",
+    general: "🌐",
   };
 
   return (
-    <div className={`border p-4 rounded-lg ${styles[warning.level]}`}>
-      <p className="text-xs uppercase text-gray-400 mb-1">Detected Topic</p>
-      <p className="font-semibold text-lg capitalize">{topic}</p>
+    <div className={`card border p-5 rounded-xl ${styles[warning.level]}`}>
+      <p className="text-xs uppercase text-gray-400">Detected Topic</p>
+
+      <div className="flex justify-between items-center mt-1">
+        <h2 className="text-xl font-bold capitalize">
+          {topicIcons[topic] || "🌐"} {topic}
+        </h2>
+        <span className="text-xs opacity-70">
+          Risk: {warning.level.toUpperCase()}
+        </span>
+      </div>
 
       <p className="mt-2 text-sm">{warning.message}</p>
     </div>
@@ -94,11 +109,10 @@ export default function Dashboard() {
     try {
       const data = await analyzeText(text);
 
-      // 🔥 UPDATED TRANSFORMATION
       const formatted = {
         aiProbability: data?.ai_detection?.ai_probability || 0,
-        topic: data?.topic || "general",          // ✅ NEW
-        warning: data?.warning || null,           // ✅ NEW
+        topic: data?.topic || "general",      // 🔥 NEW
+        warning: data?.warning || null,       // 🔥 NEW
 
         claims:
           data?.claims?.map((c, index) => ({
@@ -171,7 +185,7 @@ export default function Dashboard() {
         {uiState === "results" && results && (
           <div className="space-y-4">
 
-            {/* 🔥 NEW: TOPIC WARNING FIRST (HIGH IMPACT UX) */}
+            {/* 🔥 NEW FEATURE HERE */}
             <TopicWarning topic={results.topic} warning={results.warning} />
 
             <AiDetectionBox probability={results.aiProbability} />
