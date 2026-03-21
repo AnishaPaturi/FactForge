@@ -35,9 +35,9 @@ def run_pipeline(text: str):
         })
 
     final_output = {
-        "ai_detection": ai_score,
-        "claims": results
-    }
+            "ai_detection": ai_score,
+            "claims": results
+        }
 
     save_result(text, final_output)
 

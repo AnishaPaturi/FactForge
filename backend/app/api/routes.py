@@ -22,6 +22,7 @@ def analyze(input_data: InputRequest):
 def health():
     return {"status": "ok"}
 
+
 @router.get("/history")
 def get_history():
     db = SessionLocal()
