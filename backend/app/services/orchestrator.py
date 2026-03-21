@@ -29,10 +29,28 @@ def run_pipeline(text: str):
 
         verification = verify_claim(claim, evidence)
 
-        stances = classify_source_stance(claim, evidence)
+        # 🔥 STEP 1: GET STANCES
+        raw_stances = classify_source_stance(claim, evidence)
 
+        # 🔥 STEP 2: CLEAN + FIX STANCES (CRITICAL)
+        cleaned_stances = []
+        for i in range(len(evidence)):
+            if raw_stances and i < len(raw_stances):
+                val = str(raw_stances[i]).strip().capitalize()
+
+                if val not in ["Agree", "Disagree", "Neutral"]:
+                    val = "Neutral"
+            else:
+                val = "Neutral"
+
+            cleaned_stances.append(val)
+
+        stances = cleaned_stances
+
+        # 🔥 STEP 3: AGREEMENT
         agreement_data = compute_agreement_score(stances, evidence)
 
+        # 🔥 STEP 4: ATTACH STANCE TO SOURCES
         formatted_sources = []
         for i, src in enumerate(evidence):
             formatted_sources.append({
@@ -40,7 +58,7 @@ def run_pipeline(text: str):
                 "url": src["url"],
                 "snippet": src.get("snippet", ""),
                 "score": src.get("score", 0),
-                "stance": stances[i] if i < len(stances) else "Neutral"
+                "stance": stances[i]
             })
 
         results.append({

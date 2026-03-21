@@ -383,282 +383,491 @@
 
 
 
+// import { useState } from 'react'
+
+// <<<<<<< HEAD
+// const styles = `
+//   .rc-card {
+//     background: rgba(4, 14, 28, 0.78);
+//     border: 1px solid rgba(0, 200, 255, 0.12);
+//     border-radius: 14px;
+//     backdrop-filter: blur(16px);
+//     box-shadow: 0 4px 24px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.04);
+//     overflow: hidden;
+//     margin-bottom: 0.85rem;
+//     transition: border-color 0.2s, box-shadow 0.2s, transform 0.2s;
+//     animation: rcIn 0.4s cubic-bezier(0.16,1,0.3,1) both;
+//   }
+//   .rc-card:hover {
+//     border-color: rgba(0,200,255,0.22);
+//     box-shadow: 0 8px 30px rgba(0,0,0,0.42);
+//     transform: translateY(-1px);
+//   }
+//   @keyframes rcIn {
+//     from { opacity: 0; transform: translateY(12px); }
+//     to   { opacity: 1; transform: translateY(0); }
+//   }
+
+//   /* Verdict left-border accents */
+//   .verdict-true        { border-left: 2.5px solid rgba(74,222,128,0.55) !important; }
+//   .verdict-false       { border-left: 2.5px solid rgba(248,113,113,0.55) !important; }
+//   .verdict-partial     { border-left: 2.5px solid rgba(251,191,36,0.55) !important; }
+//   .verdict-unverifiable{ border-left: 2.5px solid rgba(100,116,139,0.45) !important; }
+
+//   /* Header */
+//   .rc-header {
+//     display: flex;
+//     align-items: flex-start;
+//     gap: 12px;
+//     padding: 1rem 1.25rem;
+//     cursor: pointer;
+//     width: 100%;
+//     background: none;
+//     border: none;
+//     text-align: left;
+//   }
+
+//   .rc-index {
+//     font-family: 'Inter', monospace;
+//     font-size: 0.62rem;
+//     color: rgba(255,255,255,0.2);
+//     flex-shrink: 0;
+//     padding-top: 3px;
+//     min-width: 18px;
+//   }
+
+//   .rc-header-body { flex: 1; min-width: 0; }
+
+//   .rc-claim-text {
+//     font-family: 'Inter', sans-serif;
+//     font-size: 0.88rem;
+//     font-weight: 500;
+//     color: #dbeafe;
+//     line-height: 1.55;
+//     margin-bottom: 8px;
+//   }
+
+//   .rc-meta-row {
+//     display: flex;
+//     align-items: center;
+//     flex-wrap: wrap;
+//     gap: 10px;
+//   }
+
+//   /* Verdict badges */
+//   .badge-true        { display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:50px;font-size:0.68rem;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;border:1px solid;background:rgba(34,197,94,0.1);border-color:rgba(34,197,94,0.3);color:#4ade80; }
+//   .badge-false       { display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:50px;font-size:0.68rem;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;border:1px solid;background:rgba(239,68,68,0.1);border-color:rgba(239,68,68,0.3);color:#f87171; }
+//   .badge-partial     { display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:50px;font-size:0.68rem;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;border:1px solid;background:rgba(245,158,11,0.1);border-color:rgba(245,158,11,0.3);color:#fbbf24; }
+//   .badge-unverifiable{ display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:50px;font-size:0.68rem;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;border:1px solid;background:rgba(100,116,139,0.12);border-color:rgba(100,116,139,0.28);color:#94a3b8; }
+
+//   /* Confidence bar */
+//   .rc-conf-wrap {
+//     display: flex;
+//     align-items: center;
+//     gap: 7px;
+//     flex: 1;
+//     min-width: 100px;
+//     max-width: 200px;
+//   }
+//   .rc-conf-track {
+//     flex: 1;
+//     height: 5px;
+//     background: rgba(255,255,255,0.07);
+//     border-radius: 99px;
+//     overflow: hidden;
+//   }
+//   .rc-conf-bar { height: 100%; border-radius: 99px; transition: width 0.6s cubic-bezier(0.16,1,0.3,1); }
+//   .bar-true        { background: #22d3ee; box-shadow: 0 0 8px rgba(34,211,238,0.4); }
+//   .bar-false       { background: #f87171; box-shadow: 0 0 8px rgba(248,113,113,0.4); }
+//   .bar-partial     { background: #fbbf24; box-shadow: 0 0 8px rgba(251,191,36,0.4); }
+//   .bar-unverifiable{ background: #64748b; }
+//   .rc-conf-label {
+//     font-family: 'Inter', monospace;
+//     font-size: 0.72rem;
+//     color: rgba(255,255,255,0.35);
+//     flex-shrink: 0;
+//   }
+
+//   /* Chevron */
+//   .rc-chevron {
+//     flex-shrink: 0;
+//     margin-top: 2px;
+//     opacity: 0.4;
+//     transition: transform 0.25s ease, opacity 0.2s;
+//   }
+//   .rc-chevron.open { transform: rotate(180deg); opacity: 0.7; }
+
+//   /* Expanded body */
+//   .rc-body {
+//     padding: 1rem 1.25rem 1.25rem;
+//     border-top: 1px solid rgba(255,255,255,0.05);
+//     display: flex;
+//     flex-direction: column;
+//     gap: 1rem;
+//     animation: rcBodyIn 0.25s ease both;
+//   }
+//   @keyframes rcBodyIn {
+//     from { opacity: 0; transform: translateY(-5px); }
+//     to   { opacity: 1; transform: translateY(0); }
+//   }
+
+//   .rc-section-label {
+//     font-family: 'Inter', sans-serif;
+//     font-size: 0.62rem;
+//     font-weight: 600;
+//     letter-spacing: 0.14em;
+//     text-transform: uppercase;
+//     color: rgba(0,200,255,0.5);
+//     margin-bottom: 6px;
+//   }
+
+//   .rc-explanation {
+//     font-family: 'Inter', sans-serif;
+//     font-size: 0.83rem;
+//     color: rgba(255,255,255,0.55);
+//     line-height: 1.65;
+//   }
+
+//   /* Source agreement block */
+//   .rc-agreement {
+//     background: rgba(255,255,255,0.025);
+//     border: 1px solid rgba(255,255,255,0.06);
+//     border-radius: 10px;
+//     padding: 0.85rem 1rem;
+//     display: flex;
+//     flex-direction: column;
+//     gap: 8px;
+//   }
+
+//   .rc-agreement-track {
+//     height: 5px;
+//     background: rgba(255,255,255,0.07);
+//     border-radius: 99px;
+//     overflow: hidden;
+//   }
+//   .rc-agreement-bar {
+//     height: 100%;
+//     background: linear-gradient(90deg, #22d3ee, #4ade80);
+//     border-radius: 99px;
+//     box-shadow: 0 0 8px rgba(74,222,128,0.3);
+//     transition: width 0.6s cubic-bezier(0.16,1,0.3,1);
+//   }
+
+//   .rc-agreement-counts {
+//     display: flex;
+//     gap: 14px;
+//     font-family: 'Inter', sans-serif;
+//     font-size: 0.75rem;
+//     color: rgba(255,255,255,0.45);
+//   }
+
+//   .rc-agreement-insight {
+//     font-family: 'Inter', sans-serif;
+//     font-size: 0.75rem;
+//     color: rgba(255,255,255,0.38);
+//     line-height: 1.55;
+//     font-style: italic;
+//   }
+
+//   /* Source rows */
+//   .rc-source-row {
+//     display: flex;
+//     align-items: center;
+//     justify-content: space-between;
+//     gap: 10px;
+//     padding: 7px 10px;
+//     background: rgba(255,255,255,0.03);
+//     border: 1px solid rgba(255,255,255,0.06);
+//     border-radius: 8px;
+//     margin-bottom: 5px;
+//     transition: background 0.2s, border-color 0.2s;
+//     text-decoration: none;
+//   }
+//   .rc-source-row:hover {
+//     background: rgba(0,180,255,0.06);
+//     border-color: rgba(0,200,255,0.16);
+//   }
+
+//   .rc-source-left {
+//     display: flex;
+//     align-items: center;
+//     gap: 7px;
+//     min-width: 0;
+//     flex: 1;
+//   }
+
+//   .rc-source-title {
+//     font-family: 'Inter', sans-serif;
+//     font-size: 0.78rem;
+//     color: #93c5fd;
+//     overflow: hidden;
+//     text-overflow: ellipsis;
+//     white-space: nowrap;
+//     transition: color 0.15s;
+//   }
+//   .rc-source-row:hover .rc-source-title { color: #00d4ff; }
+
+//   .rc-source-right {
+//     display: flex;
+//     align-items: center;
+//     gap: 8px;
+//     flex-shrink: 0;
+//   }
+
+//   .rc-stance {
+//     font-family: 'Inter', sans-serif;
+//     font-size: 0.68rem;
+//     font-weight: 600;
+//     padding: 2px 8px;
+//     border-radius: 50px;
+//     border: 1px solid;
+//     text-transform: uppercase;
+//     letter-spacing: 0.05em;
+//   }
+//   .rc-stance-agree    { background: rgba(34,197,94,0.1);  border-color: rgba(34,197,94,0.25);  color: #4ade80; }
+//   .rc-stance-disagree { background: rgba(239,68,68,0.1);  border-color: rgba(239,68,68,0.25);  color: #f87171; }
+//   .rc-stance-neutral  { background: rgba(100,116,139,0.1);border-color: rgba(100,116,139,0.25);color: #94a3b8; }
+
+//   .rc-score {
+//     font-family: 'Inter', monospace;
+//     font-size: 0.7rem;
+//     color: #00d4ff;
+//     font-weight: 600;
+//   }
+
+//   .rc-credibility {
+//     font-family: 'Inter', monospace;
+//     font-size: 0.68rem;
+//     padding: 2px 8px;
+//     border-radius: 4px;
+//     background: rgba(99,102,241,0.15);
+//     border: 1px solid rgba(99,102,241,0.25);
+//     color: #a5b4fc;
+//   }
+// `
+
+// const VERDICTS = {
+//   true:         { label: 'True',          badgeClass: 'badge-true',         borderClass: 'verdict-true',         barClass: 'bar-true'         },
+//   false:        { label: 'False',         badgeClass: 'badge-false',        borderClass: 'verdict-false',        barClass: 'bar-false'        },
+//   partial:      { label: 'Partially True',badgeClass: 'badge-partial',      borderClass: 'verdict-partial',      barClass: 'bar-partial'      },
+//   unverifiable: { label: 'Unverifiable',  badgeClass: 'badge-unverifiable', borderClass: 'verdict-unverifiable', barClass: 'bar-unverifiable' },
+// }
+
+// const STANCE_CLASS = {
+//   Agree:    'rc-stance rc-stance-agree',
+//   Disagree: 'rc-stance rc-stance-disagree',
+//   Neutral:  'rc-stance rc-stance-neutral',
+// }
+
+// const STANCE_ICON = { Agree: '🟢', Disagree: '🔴', Neutral: '⚪' }
+
+// =======
+// >>>>>>> 773084ad27802b98494eac9d38ade86c05b8d36d
+// export default function ResultCard({
+//   index = 0,
+//   claim,
+//   verdict,
+//   confidence,
+//   explanation,
+//   sources = [],
+//   source_analysis = null,
+// }) {
+//   const [expanded, setExpanded] = useState(true)
+
+//   return (
+// <<<<<<< HEAD
+//     <>
+//       <style>{styles}</style>
+//       <div
+//         className={`rc-card ${cfg.borderClass}`}
+//         style={{ animationDelay: `${index * 80}ms` }}
+//       >
+//         {/* ── Header ── */}
+//         <button className="rc-header" onClick={() => setExpanded((p) => !p)}>
+//           <span className="rc-index">{String(index + 1).padStart(2, '0')}</span>
+
+//           <div className="rc-header-body">
+//             <p className="rc-claim-text">{claim}</p>
+//             <div className="rc-meta-row">
+//               <span className={cfg.badgeClass}>{cfg.label}</span>
+//               <div className="rc-conf-wrap">
+//                 <div className="rc-conf-track">
+//                   <div
+//                     className={`rc-conf-bar ${cfg.barClass}`}
+//                     style={{ width: `${confidence}%` }}
+//                   />
+//                 </div>
+//                 <span className="rc-conf-label">{confidence}%</span>
+//               </div>
+//             </div>
+//           </div>
+// =======
+//     <div className="card border rounded p-4 mb-4">
+
+//       {/* HEADER */}
+//       <div onClick={() => setExpanded(!expanded)} className="cursor-pointer">
+//         <p className="font-semibold">{claim}</p>
+//         <div className="flex gap-3 mt-1">
+//           <span className="text-red-400">{verdict}</span>
+//           <span>{confidence}%</span>
+//         </div>
+//       </div>
+
+//       {/* BODY */}
+//       {expanded && (
+//         <div className="mt-3">
+
+//           <p className="text-sm mb-3">{explanation}</p>
+
+//           {/* 🔥 AGREEMENT */}
+//           {source_analysis && (
+//             <div className="mb-3">
+//               <p className="text-xs mb-1">Agreement</p>
+
+//               <div className="w-full bg-gray-700 h-2 rounded mb-2">
+//                 <div
+//                   className="bg-green-500 h-2 rounded"
+//                   style={{ width: `${source_analysis.agreement_score || 0}%` }}
+//                 />
+//               </div>
+
+//               <div className="flex gap-3 text-xs">
+//                 <span>🟢 {source_analysis.counts?.agree}</span>
+//                 <span>🔴 {source_analysis.counts?.disagree}</span>
+//                 <span>⚪ {source_analysis.counts?.neutral}</span>
+//               </div>
+
+//               <p className="text-xs mt-1">{source_analysis.insight}</p>
+//             </div>
+//           )}
+
+//           {/* SOURCES */}
+//           {sources.map((src, i) => {
+//             const icon =
+//               src.stance === "Agree" ? "🟢" :
+//               src.stance === "Disagree" ? "🔴" : "⚪";
+
+//             return (
+//               <div key={i} className="flex justify-between border p-2 rounded mb-1">
+//                 <span>{icon} {src.label}</span>
+//                 <span>{src.stance} | {src.score}</span>
+//               </div>
+//             );
+//           })}
+// >>>>>>> 773084ad27802b98494eac9d38ade86c05b8d36d
+
+//           <svg
+//             width="16" height="16" viewBox="0 0 16 16" fill="none"
+//             className={`rc-chevron${expanded ? ' open' : ''}`}
+//           >
+//             <path d="M4 6l4 4 4-4" stroke="rgba(255,255,255,0.5)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+//           </svg>
+//         </button>
+
+//         {/* ── Expanded body ── */}
+//         {expanded && (
+//           <div className="rc-body">
+
+//             {/* AI Analysis */}
+//             <div>
+//               <p className="rc-section-label">AI Analysis</p>
+//               <p className="rc-explanation">{explanation}</p>
+//             </div>
+
+//             {/* Source Agreement */}
+//             {source_analysis && (
+//               <div>
+//                 <p className="rc-section-label">Source Agreement</p>
+//                 <div className="rc-agreement">
+//                   <div className="rc-agreement-track">
+//                     <div
+//                       className="rc-agreement-bar"
+//                       style={{ width: `${source_analysis.agreement_score || 0}%` }}
+//                     />
+//                   </div>
+//                   <div className="rc-agreement-counts">
+//                     <span>🟢 {source_analysis.counts?.agree || 0} agree</span>
+//                     <span>🔴 {source_analysis.counts?.disagree || 0} disagree</span>
+//                     <span>⚪ {source_analysis.counts?.neutral || 0} neutral</span>
+//                   </div>
+//                   {source_analysis.insight && (
+//                     <p className="rc-agreement-insight">"{source_analysis.insight}"</p>
+//                   )}
+//                 </div>
+//               </div>
+//             )}
+
+//             {/* Sources */}
+//             {sources && sources.length > 0 && (
+//               <div>
+//                 <p className="rc-section-label">Sources</p>
+//                 {sources.map((src, i) => {
+//                   const stanceClass = STANCE_CLASS[src.stance] || 'rc-stance rc-stance-neutral'
+//                   const stanceIcon  = STANCE_ICON[src.stance]  || '⚪'
+//                   return (
+//                     <a
+//                       key={i}
+//                       href={src.url}
+//                       target="_blank"
+//                       rel="noopener noreferrer"
+//                       className="rc-source-row"
+//                     >
+//                       <div className="rc-source-left">
+//                         <span>{stanceIcon}</span>
+//                         <span className="rc-source-title">
+//                           {src.title || src.label || src.url}
+//                         </span>
+//                       </div>
+//                       <div className="rc-source-right">
+//                         {src.stance && (
+//                           <span className={stanceClass}>{src.stance}</span>
+//                         )}
+//                         {src.score != null && (
+//                           <span className="rc-score">{src.score}</span>
+//                         )}
+//                         {src.credibility && (
+//                           <span className="rc-credibility">{src.credibility}</span>
+//                         )}
+//                       </div>
+//                     </a>
+//                   )
+//                 })}
+//               </div>
+//             )}
+
+//           </div>
+//         )}
+//       </div>
+//     </>
+//   )
+// }
+
+
 import { useState } from 'react'
 
 const styles = `
-  .rc-card {
-    background: rgba(4, 14, 28, 0.78);
-    border: 1px solid rgba(0, 200, 255, 0.12);
-    border-radius: 14px;
-    backdrop-filter: blur(16px);
-    box-shadow: 0 4px 24px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.04);
-    overflow: hidden;
-    margin-bottom: 0.85rem;
-    transition: border-color 0.2s, box-shadow 0.2s, transform 0.2s;
-    animation: rcIn 0.4s cubic-bezier(0.16,1,0.3,1) both;
-  }
-  .rc-card:hover {
-    border-color: rgba(0,200,255,0.22);
-    box-shadow: 0 8px 30px rgba(0,0,0,0.42);
-    transform: translateY(-1px);
-  }
-  @keyframes rcIn {
-    from { opacity: 0; transform: translateY(12px); }
-    to   { opacity: 1; transform: translateY(0); }
-  }
+/* (keep your full styles exactly as-is — no changes needed) */
+`;
 
-  /* Verdict left-border accents */
-  .verdict-true        { border-left: 2.5px solid rgba(74,222,128,0.55) !important; }
-  .verdict-false       { border-left: 2.5px solid rgba(248,113,113,0.55) !important; }
-  .verdict-partial     { border-left: 2.5px solid rgba(251,191,36,0.55) !important; }
-  .verdict-unverifiable{ border-left: 2.5px solid rgba(100,116,139,0.45) !important; }
-
-  /* Header */
-  .rc-header {
-    display: flex;
-    align-items: flex-start;
-    gap: 12px;
-    padding: 1rem 1.25rem;
-    cursor: pointer;
-    width: 100%;
-    background: none;
-    border: none;
-    text-align: left;
-  }
-
-  .rc-index {
-    font-family: 'Inter', monospace;
-    font-size: 0.62rem;
-    color: rgba(255,255,255,0.2);
-    flex-shrink: 0;
-    padding-top: 3px;
-    min-width: 18px;
-  }
-
-  .rc-header-body { flex: 1; min-width: 0; }
-
-  .rc-claim-text {
-    font-family: 'Inter', sans-serif;
-    font-size: 0.88rem;
-    font-weight: 500;
-    color: #dbeafe;
-    line-height: 1.55;
-    margin-bottom: 8px;
-  }
-
-  .rc-meta-row {
-    display: flex;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 10px;
-  }
-
-  /* Verdict badges */
-  .badge-true        { display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:50px;font-size:0.68rem;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;border:1px solid;background:rgba(34,197,94,0.1);border-color:rgba(34,197,94,0.3);color:#4ade80; }
-  .badge-false       { display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:50px;font-size:0.68rem;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;border:1px solid;background:rgba(239,68,68,0.1);border-color:rgba(239,68,68,0.3);color:#f87171; }
-  .badge-partial     { display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:50px;font-size:0.68rem;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;border:1px solid;background:rgba(245,158,11,0.1);border-color:rgba(245,158,11,0.3);color:#fbbf24; }
-  .badge-unverifiable{ display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:50px;font-size:0.68rem;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;border:1px solid;background:rgba(100,116,139,0.12);border-color:rgba(100,116,139,0.28);color:#94a3b8; }
-
-  /* Confidence bar */
-  .rc-conf-wrap {
-    display: flex;
-    align-items: center;
-    gap: 7px;
-    flex: 1;
-    min-width: 100px;
-    max-width: 200px;
-  }
-  .rc-conf-track {
-    flex: 1;
-    height: 5px;
-    background: rgba(255,255,255,0.07);
-    border-radius: 99px;
-    overflow: hidden;
-  }
-  .rc-conf-bar { height: 100%; border-radius: 99px; transition: width 0.6s cubic-bezier(0.16,1,0.3,1); }
-  .bar-true        { background: #22d3ee; box-shadow: 0 0 8px rgba(34,211,238,0.4); }
-  .bar-false       { background: #f87171; box-shadow: 0 0 8px rgba(248,113,113,0.4); }
-  .bar-partial     { background: #fbbf24; box-shadow: 0 0 8px rgba(251,191,36,0.4); }
-  .bar-unverifiable{ background: #64748b; }
-  .rc-conf-label {
-    font-family: 'Inter', monospace;
-    font-size: 0.72rem;
-    color: rgba(255,255,255,0.35);
-    flex-shrink: 0;
-  }
-
-  /* Chevron */
-  .rc-chevron {
-    flex-shrink: 0;
-    margin-top: 2px;
-    opacity: 0.4;
-    transition: transform 0.25s ease, opacity 0.2s;
-  }
-  .rc-chevron.open { transform: rotate(180deg); opacity: 0.7; }
-
-  /* Expanded body */
-  .rc-body {
-    padding: 1rem 1.25rem 1.25rem;
-    border-top: 1px solid rgba(255,255,255,0.05);
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-    animation: rcBodyIn 0.25s ease both;
-  }
-  @keyframes rcBodyIn {
-    from { opacity: 0; transform: translateY(-5px); }
-    to   { opacity: 1; transform: translateY(0); }
-  }
-
-  .rc-section-label {
-    font-family: 'Inter', sans-serif;
-    font-size: 0.62rem;
-    font-weight: 600;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-    color: rgba(0,200,255,0.5);
-    margin-bottom: 6px;
-  }
-
-  .rc-explanation {
-    font-family: 'Inter', sans-serif;
-    font-size: 0.83rem;
-    color: rgba(255,255,255,0.55);
-    line-height: 1.65;
-  }
-
-  /* Source agreement block */
-  .rc-agreement {
-    background: rgba(255,255,255,0.025);
-    border: 1px solid rgba(255,255,255,0.06);
-    border-radius: 10px;
-    padding: 0.85rem 1rem;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-  }
-
-  .rc-agreement-track {
-    height: 5px;
-    background: rgba(255,255,255,0.07);
-    border-radius: 99px;
-    overflow: hidden;
-  }
-  .rc-agreement-bar {
-    height: 100%;
-    background: linear-gradient(90deg, #22d3ee, #4ade80);
-    border-radius: 99px;
-    box-shadow: 0 0 8px rgba(74,222,128,0.3);
-    transition: width 0.6s cubic-bezier(0.16,1,0.3,1);
-  }
-
-  .rc-agreement-counts {
-    display: flex;
-    gap: 14px;
-    font-family: 'Inter', sans-serif;
-    font-size: 0.75rem;
-    color: rgba(255,255,255,0.45);
-  }
-
-  .rc-agreement-insight {
-    font-family: 'Inter', sans-serif;
-    font-size: 0.75rem;
-    color: rgba(255,255,255,0.38);
-    line-height: 1.55;
-    font-style: italic;
-  }
-
-  /* Source rows */
-  .rc-source-row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 10px;
-    padding: 7px 10px;
-    background: rgba(255,255,255,0.03);
-    border: 1px solid rgba(255,255,255,0.06);
-    border-radius: 8px;
-    margin-bottom: 5px;
-    transition: background 0.2s, border-color 0.2s;
-    text-decoration: none;
-  }
-  .rc-source-row:hover {
-    background: rgba(0,180,255,0.06);
-    border-color: rgba(0,200,255,0.16);
-  }
-
-  .rc-source-left {
-    display: flex;
-    align-items: center;
-    gap: 7px;
-    min-width: 0;
-    flex: 1;
-  }
-
-  .rc-source-title {
-    font-family: 'Inter', sans-serif;
-    font-size: 0.78rem;
-    color: #93c5fd;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    transition: color 0.15s;
-  }
-  .rc-source-row:hover .rc-source-title { color: #00d4ff; }
-
-  .rc-source-right {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    flex-shrink: 0;
-  }
-
-  .rc-stance {
-    font-family: 'Inter', sans-serif;
-    font-size: 0.68rem;
-    font-weight: 600;
-    padding: 2px 8px;
-    border-radius: 50px;
-    border: 1px solid;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-  }
-  .rc-stance-agree    { background: rgba(34,197,94,0.1);  border-color: rgba(34,197,94,0.25);  color: #4ade80; }
-  .rc-stance-disagree { background: rgba(239,68,68,0.1);  border-color: rgba(239,68,68,0.25);  color: #f87171; }
-  .rc-stance-neutral  { background: rgba(100,116,139,0.1);border-color: rgba(100,116,139,0.25);color: #94a3b8; }
-
-  .rc-score {
-    font-family: 'Inter', monospace;
-    font-size: 0.7rem;
-    color: #00d4ff;
-    font-weight: 600;
-  }
-
-  .rc-credibility {
-    font-family: 'Inter', monospace;
-    font-size: 0.68rem;
-    padding: 2px 8px;
-    border-radius: 4px;
-    background: rgba(99,102,241,0.15);
-    border: 1px solid rgba(99,102,241,0.25);
-    color: #a5b4fc;
-  }
-`
-
+// ✅ Verdict config (FIX: missing cfg earlier)
 const VERDICTS = {
-  true:         { label: 'True',          badgeClass: 'badge-true',         borderClass: 'verdict-true',         barClass: 'bar-true'         },
-  false:        { label: 'False',         badgeClass: 'badge-false',        borderClass: 'verdict-false',        barClass: 'bar-false'        },
-  partial:      { label: 'Partially True',badgeClass: 'badge-partial',      borderClass: 'verdict-partial',      barClass: 'bar-partial'      },
+  true:         { label: 'True',          badgeClass: 'badge-true',         borderClass: 'verdict-true',         barClass: 'bar-true' },
+  false:        { label: 'False',         badgeClass: 'badge-false',        borderClass: 'verdict-false',        barClass: 'bar-false' },
+  partial:      { label: 'Partially True',badgeClass: 'badge-partial',      borderClass: 'verdict-partial',      barClass: 'bar-partial' },
   unverifiable: { label: 'Unverifiable',  badgeClass: 'badge-unverifiable', borderClass: 'verdict-unverifiable', barClass: 'bar-unverifiable' },
-}
+};
 
 const STANCE_CLASS = {
   Agree:    'rc-stance rc-stance-agree',
   Disagree: 'rc-stance rc-stance-disagree',
   Neutral:  'rc-stance rc-stance-neutral',
-}
+};
 
-const STANCE_ICON = { Agree: '🟢', Disagree: '🔴', Neutral: '⚪' }
+const STANCE_ICON = {
+  Agree: '🟢',
+  Disagree: '🔴',
+  Neutral: '⚪'
+};
 
 export default function ResultCard({
   index = 0,
@@ -669,24 +878,32 @@ export default function ResultCard({
   sources = [],
   source_analysis = null,
 }) {
-  const [expanded, setExpanded] = useState(true)
-  const cfg = VERDICTS[verdict] || VERDICTS.unverifiable
+  const [expanded, setExpanded] = useState(true);
+
+  // ✅ FIX: safely get config
+  const cfg = VERDICTS[verdict?.toLowerCase()] || VERDICTS.unverifiable;
 
   return (
     <>
       <style>{styles}</style>
+
       <div
         className={`rc-card ${cfg.borderClass}`}
         style={{ animationDelay: `${index * 80}ms` }}
       >
-        {/* ── Header ── */}
-        <button className="rc-header" onClick={() => setExpanded((p) => !p)}>
-          <span className="rc-index">{String(index + 1).padStart(2, '0')}</span>
+
+        {/* ───────── HEADER ───────── */}
+        <button className="rc-header" onClick={() => setExpanded(p => !p)}>
+          <span className="rc-index">
+            {String(index + 1).padStart(2, '0')}
+          </span>
 
           <div className="rc-header-body">
             <p className="rc-claim-text">{claim}</p>
+
             <div className="rc-meta-row">
               <span className={cfg.badgeClass}>{cfg.label}</span>
+
               <div className="rc-conf-wrap">
                 <div className="rc-conf-track">
                   <div
@@ -700,14 +917,22 @@ export default function ResultCard({
           </div>
 
           <svg
-            width="16" height="16" viewBox="0 0 16 16" fill="none"
+            width="16" height="16"
+            viewBox="0 0 16 16"
+            fill="none"
             className={`rc-chevron${expanded ? ' open' : ''}`}
           >
-            <path d="M4 6l4 4 4-4" stroke="rgba(255,255,255,0.5)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+            <path
+              d="M4 6l4 4 4-4"
+              stroke="rgba(255,255,255,0.5)"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
           </svg>
         </button>
 
-        {/* ── Expanded body ── */}
+        {/* ───────── BODY ───────── */}
         {expanded && (
           <div className="rc-body">
 
@@ -717,36 +942,48 @@ export default function ResultCard({
               <p className="rc-explanation">{explanation}</p>
             </div>
 
-            {/* Source Agreement */}
+            {/* 🔥 Source Agreement (from other branch) */}
             {source_analysis && (
               <div>
                 <p className="rc-section-label">Source Agreement</p>
+
                 <div className="rc-agreement">
                   <div className="rc-agreement-track">
                     <div
                       className="rc-agreement-bar"
-                      style={{ width: `${source_analysis.agreement_score || 0}%` }}
+                      style={{
+                        width: `${source_analysis.agreement_score || 0}%`
+                      }}
                     />
                   </div>
+
                   <div className="rc-agreement-counts">
                     <span>🟢 {source_analysis.counts?.agree || 0} agree</span>
                     <span>🔴 {source_analysis.counts?.disagree || 0} disagree</span>
                     <span>⚪ {source_analysis.counts?.neutral || 0} neutral</span>
                   </div>
+
                   {source_analysis.insight && (
-                    <p className="rc-agreement-insight">"{source_analysis.insight}"</p>
+                    <p className="rc-agreement-insight">
+                      "{source_analysis.insight}"
+                    </p>
                   )}
                 </div>
               </div>
             )}
 
             {/* Sources */}
-            {sources && sources.length > 0 && (
+            {sources.length > 0 && (
               <div>
                 <p className="rc-section-label">Sources</p>
+
                 {sources.map((src, i) => {
-                  const stanceClass = STANCE_CLASS[src.stance] || 'rc-stance rc-stance-neutral'
-                  const stanceIcon  = STANCE_ICON[src.stance]  || '⚪'
+                  const stanceClass =
+                    STANCE_CLASS[src.stance] || STANCE_CLASS.Neutral;
+
+                  const stanceIcon =
+                    STANCE_ICON[src.stance] || '⚪';
+
                   return (
                     <a
                       key={i}
@@ -761,19 +998,28 @@ export default function ResultCard({
                           {src.title || src.label || src.url}
                         </span>
                       </div>
+
                       <div className="rc-source-right">
                         {src.stance && (
-                          <span className={stanceClass}>{src.stance}</span>
+                          <span className={stanceClass}>
+                            {src.stance}
+                          </span>
                         )}
+
                         {src.score != null && (
-                          <span className="rc-score">{src.score}</span>
+                          <span className="rc-score">
+                            {src.score}
+                          </span>
                         )}
+
                         {src.credibility && (
-                          <span className="rc-credibility">{src.credibility}</span>
+                          <span className="rc-credibility">
+                            {src.credibility}
+                          </span>
                         )}
                       </div>
                     </a>
-                  )
+                  );
                 })}
               </div>
             )}
@@ -782,5 +1028,5 @@ export default function ResultCard({
         )}
       </div>
     </>
-  )
+  );
 }

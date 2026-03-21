@@ -485,6 +485,194 @@
 //   );
 // }
 
+// import { useState } from "react";
+// import Navbar from "../components/Navbar";
+// import InputBox from "../components/InputBox";
+// import ProgressStepper from "../components/ProgressStepper";
+// import SummaryStats from "../components/SummaryStats";
+// import AnalyticsPanel from "../components/AnalyticsPanel";
+// import ClaimsList from "../components/ClaimsList";
+// import Loader from "../components/Loader";
+// import Footer from "../components/Footer";
+// import { addSession } from "/historyStore";
+// import { downloadPDF } from "../services/api";
+
+// // ─── Verdict normalizer ───────────────────────────────────────────
+// const mapVerdict = (v = '') => {
+//   const map = {
+//     'True':           'true',
+//     'False':          'false',
+//     'Partially True': 'partial',
+//   }
+//   return map[v] ?? 'unverifiable'
+// }
+
+// export default function Dashboard() {
+//   const [claims, setClaims]   = useState([]);
+//   const [step, setStep]       = useState(0);
+//   const [uiState, setUiState] = useState("empty"); // "empty" | "loading" | "results"
+
+//   const handleVerify = async (input) => {
+//     if (!input?.trim()) return;
+
+//     setUiState("loading");
+//     setClaims([]);
+//     setStep(1);
+
+//     try {
+//       setStep(2);
+
+//       const response = await fetch("http://localhost:8000/analyze", {
+//         method: "POST",
+//         headers: { "Content-Type": "application/json" },
+//         body: JSON.stringify({ text: input })
+//       });
+
+//       const data = await response.json();
+//       setStep(3);
+
+//       if (Array.isArray(data.claims)) {
+//         // Normalise verdict casing for downstream components
+//         const normalised = data.claims.map((c) => ({
+//           ...c,
+//           verdict: mapVerdict(c.verdict),
+//         }));
+//         setClaims(normalised);
+//         addSession(input.trim(), data.claims); // save raw API data to history
+//         setUiState("results");
+//       } else {
+//         setClaims([]);
+//         setUiState("empty");
+//       }
+//     } catch (error) {
+//       console.error(error);
+//       setClaims([]);
+//       setUiState("empty");
+//     }
+//   };
+
+//   const handleReset = () => {
+//     setUiState("empty");
+//     setClaims([]);
+//     setStep(0);
+//   };
+
+//   const stats = {
+//     total: claims.length,
+//     true:  claims.filter((c) => c.verdict === "true").length,
+//     false: claims.filter((c) => c.verdict === "false").length,
+//     reliability:
+//       claims.length > 0
+//         ? Math.round(
+//             (claims.filter((c) => c.verdict === "true").length / claims.length) * 100
+//           )
+//         : 0,
+//   };
+
+//   return (
+//     <div style={{ minHeight: "100vh", background: "#05090f" }}>
+//       <Navbar />
+
+//       <div className="container">
+
+//         {/* Page header */}
+//         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+//           <div>
+//             <h1 style={{
+//               fontFamily: "'Orbitron', sans-serif",
+//               fontSize: "1.4rem",
+//               fontWeight: 700,
+//               color: "#e2f0ff",
+//               letterSpacing: "0.04em",
+//               marginBottom: 4,
+//               textShadow: "0 0 30px rgba(0,200,255,0.2)"
+//             }}>
+//               Fact Analyzer
+//             </h1>
+//             <p style={{ fontSize: "0.8rem", color: "rgba(255,255,255,0.35)" }}>
+//               Enter text and verify claims instantly
+//             </p>
+//           </div>
+
+//           {uiState === "results" && (
+//             <div style={{ display: "flex", gap: 10 }}>
+//               <button
+//                 onClick={() => downloadPDF(claims)}
+//                 style={{
+//                   padding: "7px 16px",
+//                   borderRadius: 8,
+//                   fontSize: "0.75rem",
+//                   fontWeight: 600,
+//                   background: "rgba(34,197,94,0.12)",
+//                   border: "1px solid rgba(34,197,94,0.3)",
+//                   color: "#4ade80",
+//                   cursor: "pointer",
+//                   fontFamily: "'Inter', sans-serif",
+//                 }}
+//               >
+//                 Download Report
+//               </button>
+//               <button
+//                 onClick={handleReset}
+//                 style={{
+//                   padding: "7px 16px",
+//                   borderRadius: 8,
+//                   fontSize: "0.75rem",
+//                   fontWeight: 500,
+//                   background: "rgba(255,255,255,0.04)",
+//                   border: "1px solid rgba(255,255,255,0.1)",
+//                   color: "rgba(255,255,255,0.5)",
+//                   cursor: "pointer",
+//                   fontFamily: "'Inter', sans-serif",
+//                 }}
+//               >
+//                 New Analysis
+//               </button>
+//             </div>
+//           )}
+//         </div>
+
+//         {/* Input */}
+//         <InputBox onVerify={handleVerify} />
+
+//         {/* Progress stepper — only while processing */}
+//         {step > 0 && uiState !== "empty" && <ProgressStepper step={step} />}
+
+//         {/* Loading */}
+//         {uiState === "loading" && <Loader />}
+
+//         {/* Empty state */}
+//         {uiState === "empty" && (
+//           <div style={{
+//             textAlign: "center",
+//             padding: "3rem 1rem",
+//             color: "rgba(255,255,255,0.22)",
+//             fontFamily: "'Inter', sans-serif",
+//             fontSize: "0.85rem",
+//             letterSpacing: "0.04em",
+//           }}>
+//             Enter text above to start verifying claims
+//           </div>
+//         )}
+
+//         {/* RESULTS */}
+//         {uiState === "results" && results && (
+//           <div className="space-y-4">
+//             <AiDetectionBox probability={results.aiProbability} />
+
+//             {results.claims.map((claim, i) => (
+//               <ResultCard key={claim.id} {...claim} index={i} />
+//             ))}
+//           </div>
+//         )}
+//       </main>
+      
+//     </div>
+//   );
+// }
+
+
+
 import { useState } from "react";
 import Navbar from "../components/Navbar";
 import InputBox from "../components/InputBox";
@@ -494,22 +682,22 @@ import AnalyticsPanel from "../components/AnalyticsPanel";
 import ClaimsList from "../components/ClaimsList";
 import Loader from "../components/Loader";
 import Footer from "../components/Footer";
-import { addSession } from "./historyStore";
+import { addSession } from "../historyStore";
 import { downloadPDF } from "../services/api";
 
 // ─── Verdict normalizer ───────────────────────────────────────────
-const mapVerdict = (v = '') => {
+const mapVerdict = (v = "") => {
   const map = {
-    'True':           'true',
-    'False':          'false',
-    'Partially True': 'partial',
-  }
-  return map[v] ?? 'unverifiable'
-}
+    True: "true",
+    False: "false",
+    "Partially True": "partial",
+  };
+  return map[v] ?? "unverifiable";
+};
 
 export default function Dashboard() {
-  const [claims, setClaims]   = useState([]);
-  const [step, setStep]       = useState(0);
+  const [claims, setClaims] = useState([]);
+  const [step, setStep] = useState(0);
   const [uiState, setUiState] = useState("empty"); // "empty" | "loading" | "results"
 
   const handleVerify = async (input) => {
@@ -525,20 +713,20 @@ export default function Dashboard() {
       const response = await fetch("http://localhost:8000/analyze", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text: input })
+        body: JSON.stringify({ text: input }),
       });
 
       const data = await response.json();
       setStep(3);
 
       if (Array.isArray(data.claims)) {
-        // Normalise verdict casing for downstream components
         const normalised = data.claims.map((c) => ({
           ...c,
           verdict: mapVerdict(c.verdict),
         }));
+
         setClaims(normalised);
-        addSession(input.trim(), data.claims); // save raw API data to history
+        addSession(input.trim(), data.claims);
         setUiState("results");
       } else {
         setClaims([]);
@@ -559,12 +747,13 @@ export default function Dashboard() {
 
   const stats = {
     total: claims.length,
-    true:  claims.filter((c) => c.verdict === "true").length,
+    true: claims.filter((c) => c.verdict === "true").length,
     false: claims.filter((c) => c.verdict === "false").length,
     reliability:
       claims.length > 0
         ? Math.round(
-            (claims.filter((c) => c.verdict === "true").length / claims.length) * 100
+            (claims.filter((c) => c.verdict === "true").length / claims.length) *
+              100
           )
         : 0,
   };
@@ -574,22 +763,34 @@ export default function Dashboard() {
       <Navbar />
 
       <div className="container">
-
         {/* Page header */}
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "flex-start",
+          }}
+        >
           <div>
-            <h1 style={{
-              fontFamily: "'Orbitron', sans-serif",
-              fontSize: "1.4rem",
-              fontWeight: 700,
-              color: "#e2f0ff",
-              letterSpacing: "0.04em",
-              marginBottom: 4,
-              textShadow: "0 0 30px rgba(0,200,255,0.2)"
-            }}>
+            <h1
+              style={{
+                fontFamily: "'Orbitron', sans-serif",
+                fontSize: "1.4rem",
+                fontWeight: 700,
+                color: "#e2f0ff",
+                letterSpacing: "0.04em",
+                marginBottom: 4,
+                textShadow: "0 0 30px rgba(0,200,255,0.2)",
+              }}
+            >
               Fact Analyzer
             </h1>
-            <p style={{ fontSize: "0.8rem", color: "rgba(255,255,255,0.35)" }}>
+            <p
+              style={{
+                fontSize: "0.8rem",
+                color: "rgba(255,255,255,0.35)",
+              }}
+            >
               Enter text and verify claims instantly
             </p>
           </div>
@@ -607,11 +808,11 @@ export default function Dashboard() {
                   border: "1px solid rgba(34,197,94,0.3)",
                   color: "#4ade80",
                   cursor: "pointer",
-                  fontFamily: "'Inter', sans-serif",
                 }}
               >
                 Download Report
               </button>
+
               <button
                 onClick={handleReset}
                 style={{
@@ -623,7 +824,6 @@ export default function Dashboard() {
                   border: "1px solid rgba(255,255,255,0.1)",
                   color: "rgba(255,255,255,0.5)",
                   cursor: "pointer",
-                  fontFamily: "'Inter', sans-serif",
                 }}
               >
                 New Analysis
@@ -635,27 +835,30 @@ export default function Dashboard() {
         {/* Input */}
         <InputBox onVerify={handleVerify} />
 
-        {/* Progress stepper — only while processing */}
-        {step > 0 && uiState !== "empty" && <ProgressStepper step={step} />}
+        {/* Stepper */}
+        {step > 0 && uiState !== "empty" && (
+          <ProgressStepper step={step} />
+        )}
 
-        {/* Loading */}
+        {/* Loader */}
         {uiState === "loading" && <Loader />}
 
-        {/* Empty state */}
+        {/* Empty */}
         {uiState === "empty" && (
-          <div style={{
-            textAlign: "center",
-            padding: "3rem 1rem",
-            color: "rgba(255,255,255,0.22)",
-            fontFamily: "'Inter', sans-serif",
-            fontSize: "0.85rem",
-            letterSpacing: "0.04em",
-          }}>
+          <div
+            style={{
+              textAlign: "center",
+              padding: "3rem 1rem",
+              color: "rgba(255,255,255,0.22)",
+              fontSize: "0.85rem",
+              letterSpacing: "0.04em",
+            }}
+          >
             Enter text above to start verifying claims
           </div>
         )}
 
-        {/* Results */}
+        {/* RESULTS */}
         {uiState === "results" && claims.length > 0 && (
           <>
             <SummaryStats stats={stats} />
@@ -663,10 +866,10 @@ export default function Dashboard() {
             <ClaimsList claims={claims} />
           </>
         )}
-
       </div>
 
       <Footer />
     </div>
   );
 }
+

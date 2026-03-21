@@ -53,19 +53,23 @@ def verify_claim(claim: str, evidence: list):
 
 # 🔥 IMPROVED STANCE CLASSIFIER
 def classify_source_stance(claim: str, evidence: list):
+    from app.utils.helpers import safe_request
+    from app.core.config import OPENROUTER_API_KEY, OPENROUTER_BASE_URL, MODEL_NAME
+    import json, re
+
     prompt = f"""
 Claim: {claim}
 
-You MUST classify each source strictly:
+You must classify each source STRICTLY:
 
-Rules:
-- If the source supports the claim → "Agree"
-- If the source contradicts or refutes the claim → "Disagree"
-- Only use "Neutral" if the source is unrelated
+- If source supports claim → Agree
+- If source contradicts or proves claim false → Disagree
+- Use Neutral ONLY if unrelated
 
-Be decisive. Do NOT be cautious.
+IMPORTANT:
+If source says claim is false → Disagree
 
-Return ONLY a JSON list:
+Return ONLY:
 ["Agree", "Disagree", "Agree"]
 
 NO explanation.
@@ -95,18 +99,15 @@ Sources:
     content = response["choices"][0]["message"]["content"]
 
     try:
-        json_match = re.search(r'\[.*\]', content, re.DOTALL)
-        result = json.loads(json_match.group()) if json_match else []
+        match = re.search(r'\[.*\]', content, re.DOTALL)
+        result = json.loads(match.group()) if match else []
 
-        # Ensure length match (VERY IMPORTANT)
         if len(result) != len(evidence):
             return ["Neutral"] * len(evidence)
 
         return result
-
     except:
         return ["Neutral"] * len(evidence)
-
 
 # 🔥 FINAL AGREEMENT (COUNTS + WEIGHTED)
 def compute_agreement_score(stances: list, evidence: list):
