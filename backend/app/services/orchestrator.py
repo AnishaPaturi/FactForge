@@ -1,6 +1,10 @@
 from app.services.claim_extractor import extract_claims
 from app.services.search_service import search_claim
-from app.services.verifier import verify_claim, classify_source_stance, compute_agreement_score
+from app.services.verifier import (
+    verify_claim,
+    classify_source_stance,
+    compute_agreement_score,
+)
 from app.services.ai_detector import detect_ai
 from app.services.db_service import save_result
 from urllib.parse import urlparse
@@ -27,30 +31,66 @@ def run_pipeline(text: str):
             })
             continue
 
+        # 🔥 VERIFY CLAIM
         verification = verify_claim(claim, evidence)
+        verdict = verification["verdict"]
 
-        # 🔥 STEP 1: GET STANCES
+        # 🔥 GET RAW STANCES (LLM)
         raw_stances = classify_source_stance(claim, evidence)
 
-        # 🔥 STEP 2: CLEAN + FIX STANCES (CRITICAL)
-        cleaned_stances = []
-        for i in range(len(evidence)):
-            if raw_stances and i < len(raw_stances):
-                val = str(raw_stances[i]).strip().capitalize()
+        # 🔥 KEYWORDS
+        negative_keywords = [
+            "myth", "false", "not visible", "cannot be seen",
+            "not true", "incorrect", "no evidence", "debunked",
+            "misconception", "not possible", "never"
+        ]
 
+        positive_keywords = [
+            "true", "correct", "confirmed", "proven", "visible", "yes"
+        ]
+
+        cleaned_stances = []
+
+        # 🔥 MAIN LOOP (FINAL VERSION)
+        for i in range(len(evidence)):
+            content = " ".join([
+                evidence[i].get("title", ""),
+                evidence[i].get("snippet", ""),
+                evidence[i].get("content", "")
+            ]).lower()
+
+            val = "Neutral"
+
+            # ✅ RULE 1: KEYWORD OVERRIDE
+            if any(k in content for k in negative_keywords):
+                val = "Disagree"
+            elif any(k in content for k in positive_keywords):
+                val = "Agree"
+
+            # ✅ RULE 2: LLM FALLBACK
+            elif raw_stances and i < len(raw_stances):
+                val = str(raw_stances[i]).strip().capitalize()
                 if val not in ["Agree", "Disagree", "Neutral"]:
                     val = "Neutral"
-            else:
-                val = "Neutral"
+
+            # 🔥🔥🔥 RULE 3: VERDICT ALIGNMENT (CRITICAL FIX)
+            if val == "Neutral":
+                if verdict == "False":
+                    val = "Disagree"
+                elif verdict == "True":
+                    val = "Agree"
 
             cleaned_stances.append(val)
 
         stances = cleaned_stances
 
-        # 🔥 STEP 3: AGREEMENT
-        agreement_data = compute_agreement_score(stances, evidence)
-
-        # 🔥 STEP 4: ATTACH STANCE TO SOURCES
+        # 🔥 AGREEMENT SCORE
+        agreement_data = compute_agreement_score(stances, evidence) or {
+            "counts": {"agree": 0, "disagree": 0, "neutral": 0},
+            "agreement_score": 0,
+            "insight": "No agreement data available"
+        }
+        # 🔥 FORMAT SOURCES
         formatted_sources = []
         for i, src in enumerate(evidence):
             formatted_sources.append({
@@ -76,5 +116,6 @@ def run_pipeline(text: str):
     }
 
     save_result(text, final_output)
+    print("FINAL OUTPUT:", final_output)
 
     return final_output

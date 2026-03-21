@@ -673,6 +673,7 @@
 
 
 
+
 import { useState } from "react";
 import Navbar from "../components/Navbar";
 import InputBox from "../components/InputBox";
@@ -682,23 +683,70 @@ import AnalyticsPanel from "../components/AnalyticsPanel";
 import ClaimsList from "../components/ClaimsList";
 import Loader from "../components/Loader";
 import Footer from "../components/Footer";
-import { addSession } from "../historyStore";
+import { addSession } from "./HistoryStore";
 import { downloadPDF } from "../services/api";
 
-// ─── Verdict normalizer ───────────────────────────────────────────
-const mapVerdict = (v = "") => {
-  const map = {
-    True: "true",
-    False: "false",
-    "Partially True": "partial",
+/* AI Detection Box */
+function AiDetectionBox({ probability }) {
+  const pct = probability || 0;
+  const level = pct >= 70 ? "high" : pct >= 40 ? "medium" : "low";
+
+  const colors = {
+    high: {
+      text: "text-red-400",
+      bar: "from-red-600 to-red-400",
+      bg: "bg-red-500/10 border-red-500/25",
+      label: "Likely AI-Generated",
+    },
+    medium: {
+      text: "text-amber-400",
+      bar: "from-amber-600 to-amber-400",
+      bg: "bg-amber-500/10 border-amber-500/25",
+      label: "Possibly AI-Assisted",
+    },
+    low: {
+      text: "text-emerald-400",
+      bar: "from-emerald-600 to-emerald-400",
+      bg: "bg-emerald-500/10 border-emerald-500/25",
+      label: "Likely Human-Written",
+    },
   };
-  return map[v] ?? "unverifiable";
+
+  const c = colors[level];
+
+  return (
+    <div className={`card p-5 border ${c.bg}`}>
+      <div className="flex justify-between">
+        <div>
+          <p className="text-xs text-gray-400 uppercase">AI Detection</p>
+          <p className={`font-semibold ${c.text}`}>{c.label}</p>
+        </div>
+        <p className={`text-3xl font-bold ${c.text}`}>{pct}%</p>
+      </div>
+
+      <div className="mt-3 h-2 bg-gray-700 rounded">
+        <div
+          className={`h-full bg-gradient-to-r ${c.bar}`}
+          style={{ width: `${pct}%` }}
+        />
+      </div>
+    </div>
+  );
+}
+
+/* Verdict normalizer */
+const mapVerdict = (v = "") => {
+  if (v === "True") return "true";
+  if (v === "False") return "false";
+  if (v === "Partially True") return "partial";
+  return "unverifiable";
 };
 
 export default function Dashboard() {
   const [claims, setClaims] = useState([]);
   const [step, setStep] = useState(0);
-  const [uiState, setUiState] = useState("empty"); // "empty" | "loading" | "results"
+  const [uiState, setUiState] = useState("empty");
+  const [aiProbability, setAiProbability] = useState(0);
 
   const handleVerify = async (input) => {
     if (!input?.trim()) return;
@@ -720,20 +768,21 @@ export default function Dashboard() {
       setStep(3);
 
       if (Array.isArray(data.claims)) {
-        const normalised = data.claims.map((c) => ({
+        const normalized = data.claims.map((c) => ({
           ...c,
           verdict: mapVerdict(c.verdict),
         }));
 
-        setClaims(normalised);
+        setClaims(normalized);
+        setAiProbability(data?.ai_detection?.ai_probability || 0);
         addSession(input.trim(), data.claims);
         setUiState("results");
       } else {
         setClaims([]);
         setUiState("empty");
       }
-    } catch (error) {
-      console.error(error);
+    } catch (err) {
+      console.error(err);
       setClaims([]);
       setUiState("empty");
     }
@@ -752,7 +801,8 @@ export default function Dashboard() {
     reliability:
       claims.length > 0
         ? Math.round(
-            (claims.filter((c) => c.verdict === "true").length / claims.length) *
+            (claims.filter((c) => c.verdict === "true").length /
+              claims.length) *
               100
           )
         : 0,
@@ -763,68 +813,26 @@ export default function Dashboard() {
       <Navbar />
 
       <div className="container">
-        {/* Page header */}
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "flex-start",
-          }}
-        >
+        <div className="flex justify-between items-start">
           <div>
-            <h1
-              style={{
-                fontFamily: "'Orbitron', sans-serif",
-                fontSize: "1.4rem",
-                fontWeight: 700,
-                color: "#e2f0ff",
-                letterSpacing: "0.04em",
-                marginBottom: 4,
-                textShadow: "0 0 30px rgba(0,200,255,0.2)",
-              }}
-            >
-              Fact Analyzer
-            </h1>
-            <p
-              style={{
-                fontSize: "0.8rem",
-                color: "rgba(255,255,255,0.35)",
-              }}
-            >
+            <h1 className="text-xl font-bold text-white">Fact Analyzer</h1>
+            <p className="text-sm text-gray-400">
               Enter text and verify claims instantly
             </p>
           </div>
 
           {uiState === "results" && (
-            <div style={{ display: "flex", gap: 10 }}>
+            <div className="flex gap-3">
               <button
                 onClick={() => downloadPDF(claims)}
-                style={{
-                  padding: "7px 16px",
-                  borderRadius: 8,
-                  fontSize: "0.75rem",
-                  fontWeight: 600,
-                  background: "rgba(34,197,94,0.12)",
-                  border: "1px solid rgba(34,197,94,0.3)",
-                  color: "#4ade80",
-                  cursor: "pointer",
-                }}
+                className="bg-green-600 text-white px-4 py-1 rounded"
               >
                 Download Report
               </button>
 
               <button
                 onClick={handleReset}
-                style={{
-                  padding: "7px 16px",
-                  borderRadius: 8,
-                  fontSize: "0.75rem",
-                  fontWeight: 500,
-                  background: "rgba(255,255,255,0.04)",
-                  border: "1px solid rgba(255,255,255,0.1)",
-                  color: "rgba(255,255,255,0.5)",
-                  cursor: "pointer",
-                }}
+                className="border px-3 py-1 rounded text-sm"
               >
                 New Analysis
               </button>
@@ -832,35 +840,23 @@ export default function Dashboard() {
           )}
         </div>
 
-        {/* Input */}
         <InputBox onVerify={handleVerify} />
 
-        {/* Stepper */}
         {step > 0 && uiState !== "empty" && (
           <ProgressStepper step={step} />
         )}
 
-        {/* Loader */}
         {uiState === "loading" && <Loader />}
 
-        {/* Empty */}
         {uiState === "empty" && (
-          <div
-            style={{
-              textAlign: "center",
-              padding: "3rem 1rem",
-              color: "rgba(255,255,255,0.22)",
-              fontSize: "0.85rem",
-              letterSpacing: "0.04em",
-            }}
-          >
+          <div className="text-center py-10 text-gray-400">
             Enter text above to start verifying claims
           </div>
         )}
 
-        {/* RESULTS */}
         {uiState === "results" && claims.length > 0 && (
           <>
+            <AiDetectionBox probability={aiProbability} />
             <SummaryStats stats={stats} />
             <AnalyticsPanel data={claims} />
             <ClaimsList claims={claims} />
