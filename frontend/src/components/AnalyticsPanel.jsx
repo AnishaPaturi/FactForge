@@ -1,16 +1,3 @@
-// import ConfidenceChart from "./ConfidenceChart";
-// import ResultBreakdownChart from "./ResultBreakdownChart";
-
-// export default function AnalyticsPanel({ data }) {
-//   return (
-//     <div className="analytics-grid">
-//       <ConfidenceChart data={data} />
-//       <ResultBreakdownChart data={data} />
-//     </div>
-//   );
-// }
-
-
 
 import ConfidenceChart from "./ConfidenceChart";
 import ResultBreakdownChart from "./ResultBreakdownChart";

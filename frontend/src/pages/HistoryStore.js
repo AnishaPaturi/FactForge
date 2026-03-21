@@ -1,9 +1,3 @@
-// pages/historyStore.js
-// ─────────────────────────────────────────────────────────────
-// Shared localStorage-based history store.
-// Dashboard calls addSession() after every successful API call.
-// History page calls getSessions() to read all past sessions.
-// ─────────────────────────────────────────────────────────────
 
 const STORAGE_KEY = 'factforge_history'
 

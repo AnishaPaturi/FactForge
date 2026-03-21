@@ -1,30 +1,3 @@
-// export default function SummaryStats({ stats }) {
-//   return (
-//     <div className="stats-grid">
-//       <div className="stat-box">
-//         <h3>{stats.total}</h3>
-//         <p>Total Claims</p>
-//       </div>
-
-//       <div className="stat-box">
-//         <h3>{stats.true}</h3>
-//         <p>True</p>
-//       </div>
-
-//       <div className="stat-box">
-//         <h3>{stats.false}</h3>
-//         <p>False</p>
-//       </div>
-
-//       <div className="stat-box">
-//         <h3>{stats.reliability}%</h3>
-//         <p>Reliability</p>
-//       </div>
-//     </div>
-//   );
-// }
-
-
 
 const STAT_ICONS = {
   total:       { icon: "⬡", accent: "rgba(0,200,255,0.7)"  },

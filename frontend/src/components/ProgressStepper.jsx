@@ -1,25 +1,3 @@
-// export default function ProgressStepper({ step }) {
-//   const steps = [
-//     { id: 1, label: "Extracting Claims" },
-//     { id: 2, label: "Searching Evidence" },
-//     { id: 3, label: "Verifying" }
-//   ];
-
-//   return (
-//     <div className="progress-stepper">
-//       {steps.map((s) => (
-//         <div key={s.id} className="step-wrapper">
-//           <div className={`step-circle ${step >= s.id ? "active-step" : ""}`}>
-//             {s.id}
-//           </div>
-//           <p className="step-label">{s.label}</p>
-//         </div>
-//       ))}
-//     </div>
-//   );
-// }
-
-
 
 export default function ProgressStepper({ step }) {
   const steps = [

@@ -1,681 +1,1241 @@
+
+
+
+
 // import { useState } from "react";
 // import Navbar from "../components/Navbar";
 // import InputBox from "../components/InputBox";
-// import ResultCard from "../components/ResultCard";
+// import ProgressStepper from "../components/ProgressStepper";
+// import SummaryStats from "../components/SummaryStats";
+// import AnalyticsPanel from "../components/AnalyticsPanel";
+// import ClaimsList from "../components/ClaimsList";
 // import Loader from "../components/Loader";
-// import { analyzeText } from "../services/api";
+// import Footer from "../components/Footer";
+// import { addSession } from "./historyStore";
+// import { downloadPDF } from "../services/api";
 
-// // ─── AI Detection Box ─────────────────────────────────────────────
+// /* ─── Scoped styles ─────────────────────────────────────────────── */
+// const styles = `
+//   @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
+
+//   /* ── Hero section ── */
+//   .db-hero {
+//     display: flex;
+//     flex-direction: column;
+//     align-items: center;
+//     justify-content: center;
+//     text-align: center;
+//     padding: 3.5rem 1rem 1.5rem;
+//     gap: 1rem;
+//     animation: heroIn 0.7s cubic-bezier(0.16,1,0.3,1) both;
+//   }
+
+//   @keyframes heroIn {
+//     from { opacity: 0; transform: translateY(20px); }
+//     to   { opacity: 1; transform: translateY(0); }
+//   }
+
+//   .db-greeting {
+//     font-family: 'Inter', sans-serif;
+//     font-size: 0.95rem;
+//     font-weight: 500;
+//     color: rgba(0,200,255,0.75);
+//     letter-spacing: 0.1em;
+//     text-transform: uppercase;
+//     display: flex;
+//     align-items: center;
+//     gap: 8px;
+//   }
+
+//   .db-greeting-dot {
+//     width: 7px; height: 7px;
+//     border-radius: 50%;
+//     background: #00d4ff;
+//     box-shadow: 0 0 10px rgba(0,212,255,0.9);
+//     animation: dotBlink 2s ease-in-out infinite;
+//   }
+
+//   @keyframes dotBlink {
+//     0%,100% { opacity: 1; }
+//     50%      { opacity: 0.3; }
+//   }
+
+//   .db-hero-title {
+//     font-family: 'Orbitron', sans-serif;
+//     font-size: clamp(1.8rem, 4vw, 2.8rem);
+//     font-weight: 700;
+//     color: #fff;
+//     letter-spacing: -0.01em;
+//     line-height: 1.2;
+//     text-shadow: 0 0 60px rgba(0,200,255,0.25), 0 0 120px rgba(0,150,255,0.1);
+//   }
+
+//   .db-hero-title span {
+//     background: linear-gradient(135deg, #00d4ff 0%, #7dd3fc 50%, #a5b4fc 100%);
+//     -webkit-background-clip: text;
+//     -webkit-text-fill-color: transparent;
+//     background-clip: text;
+//   }
+
+//   .db-hero-sub {
+//     font-family: 'Inter', sans-serif;
+//     font-size: 1.05rem;
+//     font-weight: 400;
+//     color: rgba(255,255,255,0.55);
+//     max-width: 520px;
+//     line-height: 1.65;
+//   }
+
+//   /* ── Search area (Claude/ChatGPT style) ── */
+//   .db-search-area {
+//     width: 100%;
+//     max-width: 760px;
+//     margin: 0 auto;
+//     padding: 0 1.5rem 2rem;
+//     animation: heroIn 0.8s cubic-bezier(0.16,1,0.3,1) 0.1s both;
+//   }
+
+//   /* ── Example prompts ── */
+//   .db-examples {
+//     display: flex;
+//     flex-wrap: wrap;
+//     gap: 8px;
+//     justify-content: center;
+//     margin-top: 1rem;
+//   }
+
+//   .db-example-chip {
+//     padding: 6px 14px;
+//     border-radius: 50px;
+//     font-family: 'Inter', sans-serif;
+//     font-size: 0.78rem;
+//     font-weight: 400;
+//     color: rgba(255,255,255,0.45);
+//     background: rgba(255,255,255,0.04);
+//     border: 1px solid rgba(255,255,255,0.09);
+//     cursor: pointer;
+//     transition: all 0.2s;
+//     white-space: nowrap;
+//   }
+//   .db-example-chip:hover {
+//     color: #00d4ff;
+//     border-color: rgba(0,200,255,0.3);
+//     background: rgba(0,180,255,0.08);
+//   }
+
+//   /* ── Results area ── */
+//   .db-results {
+//     width: 100%;
+//     max-width: 860px;
+//     margin: 0 auto;
+//     padding: 0 1.5rem 3rem;
+//     display: flex;
+//     flex-direction: column;
+//     gap: 1.4rem;
+//     animation: heroIn 0.5s cubic-bezier(0.16,1,0.3,1) both;
+//   }
+
+//   /* ── Results header bar ── */
+//   .db-results-header {
+//     display: flex;
+//     align-items: center;
+//     justify-content: space-between;
+//     flex-wrap: wrap;
+//     gap: 10px;
+//     padding-bottom: 0.25rem;
+//     border-bottom: 1px solid rgba(0,200,255,0.08);
+//   }
+
+//   .db-results-label {
+//     font-family: 'Orbitron', sans-serif;
+//     font-size: 0.75rem;
+//     font-weight: 600;
+//     letter-spacing: 0.12em;
+//     text-transform: uppercase;
+//     color: rgba(0,200,255,0.65);
+//   }
+
+//   .db-results-actions {
+//     display: flex;
+//     gap: 8px;
+//   }
+
+//   .db-btn-download {
+//     padding: 6px 16px;
+//     border-radius: 8px;
+//     font-family: 'Inter', sans-serif;
+//     font-size: 0.75rem;
+//     font-weight: 600;
+//     background: rgba(34,197,94,0.1);
+//     border: 1px solid rgba(34,197,94,0.3);
+//     color: #4ade80;
+//     cursor: pointer;
+//     display: flex;
+//     align-items: center;
+//     gap: 6px;
+//     transition: all 0.2s;
+//   }
+//   .db-btn-download:hover {
+//     background: rgba(34,197,94,0.18);
+//     border-color: rgba(34,197,94,0.5);
+//     box-shadow: 0 0 16px rgba(34,197,94,0.15);
+//   }
+
+//   .db-btn-reset {
+//     padding: 6px 16px;
+//     border-radius: 8px;
+//     font-family: 'Inter', sans-serif;
+//     font-size: 0.75rem;
+//     font-weight: 500;
+//     background: rgba(255,255,255,0.04);
+//     border: 1px solid rgba(255,255,255,0.1);
+//     color: rgba(255,255,255,0.45);
+//     cursor: pointer;
+//     display: flex;
+//     align-items: center;
+//     gap: 6px;
+//     transition: all 0.2s;
+//   }
+//   .db-btn-reset:hover {
+//     color: rgba(255,255,255,0.8);
+//     border-color: rgba(255,255,255,0.2);
+//     background: rgba(255,255,255,0.07);
+//   }
+
+//   /* ── AI Detection card ── */
+//   .db-ai-card {
+//     background: rgba(4,14,28,0.78);
+//     border: 1px solid;
+//     border-radius: 14px;
+//     padding: 1.2rem 1.4rem;
+//     backdrop-filter: blur(16px);
+//     box-shadow: 0 4px 24px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.04);
+//   }
+//   .db-ai-card.high   { border-color: rgba(239,68,68,0.28); }
+//   .db-ai-card.medium { border-color: rgba(245,158,11,0.28); }
+//   .db-ai-card.low    { border-color: rgba(34,197,94,0.22); }
+
+//   .db-ai-top {
+//     display: flex;
+//     justify-content: space-between;
+//     align-items: flex-start;
+//     margin-bottom: 0.9rem;
+//   }
+
+//   .db-ai-label-tag {
+//     font-family: 'Inter', sans-serif;
+//     font-size: 0.68rem;
+//     font-weight: 600;
+//     letter-spacing: 0.12em;
+//     text-transform: uppercase;
+//     color: rgba(255,255,255,0.35);
+//     margin-bottom: 4px;
+//   }
+
+//   .db-ai-verdict {
+//     font-family: 'Inter', sans-serif;
+//     font-size: 1.05rem;
+//     font-weight: 600;
+//   }
+//   .db-ai-verdict.high   { color: #f87171; }
+//   .db-ai-verdict.medium { color: #fbbf24; }
+//   .db-ai-verdict.low    { color: #4ade80; }
+
+//   .db-ai-pct {
+//     font-family: 'Orbitron', sans-serif;
+//     font-size: 2rem;
+//     font-weight: 700;
+//     line-height: 1;
+//   }
+//   .db-ai-pct.high   { color: #f87171; text-shadow: 0 0 20px rgba(248,113,113,0.4); }
+//   .db-ai-pct.medium { color: #fbbf24; text-shadow: 0 0 20px rgba(251,191,36,0.4); }
+//   .db-ai-pct.low    { color: #4ade80; text-shadow: 0 0 20px rgba(74,222,128,0.4); }
+
+//   .db-ai-track {
+//     height: 5px;
+//     background: rgba(255,255,255,0.07);
+//     border-radius: 99px;
+//     overflow: hidden;
+//   }
+
+//   .db-ai-bar {
+//     height: 100%;
+//     border-radius: 99px;
+//     transition: width 0.8s cubic-bezier(0.16,1,0.3,1);
+//   }
+//   .db-ai-bar.high   { background: linear-gradient(90deg, #dc2626, #f87171); box-shadow: 0 0 10px rgba(239,68,68,0.4); }
+//   .db-ai-bar.medium { background: linear-gradient(90deg, #d97706, #fbbf24); box-shadow: 0 0 10px rgba(245,158,11,0.4); }
+//   .db-ai-bar.low    { background: linear-gradient(90deg, #16a34a, #4ade80); box-shadow: 0 0 10px rgba(34,197,94,0.4); }
+
+//   /* ── Topic warning card ── */
+//   .db-topic-card {
+//     background: rgba(4,14,28,0.78);
+//     border-radius: 14px;
+//     padding: 1.1rem 1.4rem;
+//     backdrop-filter: blur(16px);
+//     display: flex;
+//     flex-direction: column;
+//     gap: 5px;
+//   }
+//   .db-topic-card.high   { border: 1px solid rgba(239,68,68,0.35); }
+//   .db-topic-card.medium { border: 1px solid rgba(245,158,11,0.35); }
+//   .db-topic-card.low    { border: 1px solid rgba(59,130,246,0.35); }
+
+//   .db-topic-tag {
+//     font-size: 0.62rem;
+//     font-weight: 600;
+//     letter-spacing: 0.14em;
+//     text-transform: uppercase;
+//     color: rgba(255,255,255,0.3);
+//   }
+
+//   .db-topic-name {
+//     font-family: 'Orbitron', sans-serif;
+//     font-size: 1rem;
+//     font-weight: 600;
+//     color: #e2f0ff;
+//     text-transform: capitalize;
+//   }
+
+//   .db-topic-msg {
+//     font-family: 'Inter', sans-serif;
+//     font-size: 0.85rem;
+//     color: rgba(255,255,255,0.55);
+//     line-height: 1.55;
+//   }
+
+//   /* ── Empty state ── */
+//   .db-empty {
+//     display: flex;
+//     flex-direction: column;
+//     align-items: center;
+//     gap: 10px;
+//     padding: 1.5rem 1rem 4rem;
+//     text-align: center;
+//   }
+
+//   .db-empty-hint {
+//     font-family: 'Inter', sans-serif;
+//     font-size: 0.78rem;
+//     color: rgba(255,255,255,0.18);
+//     letter-spacing: 0.05em;
+//   }
+
+//   /* ── Stepper / loader area ── */
+//   .db-process-area {
+//     max-width: 760px;
+//     margin: 0 auto;
+//     width: 100%;
+//     padding: 0 1.5rem;
+//   }
+
+//   /* ── Bigger, brighter text overrides ── */
+//   .db-results .ff-claim-text,
+//   .db-results .rc-claim-text {
+//     font-size: 0.95rem !important;
+//     color: #e2f0ff !important;
+//   }
+
+//   .db-results .rc-explanation,
+//   .db-results .ff-claim-explanation {
+//     font-size: 0.88rem !important;
+//     color: rgba(255,255,255,0.65) !important;
+//   }
+
+//   .db-results .stat-box h3 {
+//     font-size: 1.8rem !important;
+//   }
+
+//   .db-results .stat-box p {
+//     font-size: 0.72rem !important;
+//     color: rgba(255,255,255,0.45) !important;
+//   }
+// `
+
+// /* ─── Helpers ───────────────────────────────────────────────────── */
+// function getGreeting() {
+//   const h = new Date().getHours()
+//   if (h < 12) return { text: "Good Morning", emoji: "☀️" }
+//   if (h < 17) return { text: "Good Afternoon", emoji: "🌤️" }
+//   return { text: "Good Evening", emoji: "🌙" }
+// }
+
+// const EXAMPLE_CLAIMS = [
+//   "The Great Wall is visible from space",
+//   "Einstein failed math in school",
+//   "Humans only use 10% of their brain",
+//   "Lightning never strikes the same place twice",
+// ]
+
+// const mapVerdict = (v = "") => {
+//   if (v === "True")           return "true"
+//   if (v === "False")          return "false"
+//   if (v === "Partially True") return "partial"
+//   return "unverifiable"
+// }
+
+// /* ─── AI Detection Box ──────────────────────────────────────────── */
 // function AiDetectionBox({ probability }) {
-//   const pct = probability || 0;
-//   const level = pct >= 70 ? "high" : pct >= 40 ? "medium" : "low";
-
-//   const colors = {
-//     high: {
-//       text: "text-red-400",
-//       bar: "from-red-600 to-red-400",
-//       bg: "bg-red-500/10 border-red-500/25",
-//       label: "Likely AI-Generated",
-//     },
-//     medium: {
-//       text: "text-amber-400",
-//       bar: "from-amber-600 to-amber-400",
-//       bg: "bg-amber-500/10 border-amber-500/25",
-//       label: "Possibly AI-Assisted",
-//     },
-//     low: {
-//       text: "text-emerald-400",
-//       bar: "from-emerald-600 to-emerald-400",
-//       bg: "bg-emerald-500/10 border-emerald-500/25",
-//       label: "Likely Human-Written",
-//     },
-//   };
-
-//   const c = colors[level];
+//   const pct   = probability || 0
+//   const level = pct >= 70 ? "high" : pct >= 40 ? "medium" : "low"
+//   const label = { high: "Likely AI-Generated", medium: "Possibly AI-Assisted", low: "Likely Human-Written" }
 
 //   return (
-//     <div className={`card p-5 border ${c.bg}`}>
-//       <div className="flex justify-between">
+//     <div className={`db-ai-card ${level}`}>
+//       <div className="db-ai-top">
 //         <div>
-//           <p className="text-xs text-gray-400 uppercase">AI Detection</p>
-//           <p className={`font-semibold ${c.text}`}>{c.label}</p>
+//           <p className="db-ai-label-tag">AI Detection</p>
+//           <p className={`db-ai-verdict ${level}`}>{label[level]}</p>
 //         </div>
-//         <p className={`text-3xl font-bold ${c.text}`}>{pct}%</p>
+//         <p className={`db-ai-pct ${level}`}>{pct}%</p>
 //       </div>
-
-//       <div className="mt-3 h-2 bg-gray-700 rounded">
-//         <div
-//           className={`h-full bg-gradient-to-r ${c.bar}`}
-//           style={{ width: `${pct}%` }}
-//         />
+//       <div className="db-ai-track">
+//         <div className={`db-ai-bar ${level}`} style={{ width: `${pct}%` }} />
 //       </div>
 //     </div>
-//   );
+//   )
 // }
 
-// // ─── VERDICT MAPPING FIX (IMPORTANT) ─────────────────────────────
-// const mapVerdict = (v) => {
-//   if (v === "True") return "true";
-//   if (v === "False") return "false";
-//   if (v === "Partially True") return "partial";
-//   return "unverifiable";
-// };
-
-// // ─── MAIN DASHBOARD ───────────────────────────────────────────────
-// export default function Dashboard() {
-//   const [uiState, setUiState] = useState("empty");
-//   const [results, setResults] = useState(null);
-
-//   const handleAnalyze = async (text) => {
-//     if (!text?.trim()) return;
-
-//     setUiState("loading");
-//     setResults(null);
-
-//     try {
-//       const data = await analyzeText(text);
-
-//       // 🔥 transform backend → frontend format
-//       const formatted = {
-//         aiProbability: data?.ai_detection?.ai_probability || 0,
-//         claims:
-//           data?.claims?.map((c, index) => ({
-//             id: index,
-//             claim: c.claim,
-//             verdict: mapVerdict(c.verdict),
-//             confidence: c.confidence,
-//             explanation: c.explanation,
-//             sources:
-//               c.sources?.map((s) => ({
-//                 label: s.title,
-//                 url: s.url,
-//               })) || [],
-//           })) || [],
-//       };
-
-//       setResults(formatted);
-//       setUiState("results");
-//     } catch (error) {
-//       console.error(error);
-//       alert("Error connecting to backend");
-//       setUiState("empty");
-//     }
-//   };
-
-//   const handleReset = () => {
-//     setUiState("empty");
-//     setResults(null);
-//   };
-
+// /* ─── Topic Warning ─────────────────────────────────────────────── */
+// function TopicWarning({ topic, warning }) {
+//   if (!warning || warning.level === "none") return null
 //   return (
-//     <div className="min-h-screen dot-grid">
-//       <Navbar />
-
-//       <main className="max-w-3xl mx-auto p-6 space-y-5">
-//         {/* Header */}
-//         <div className="flex justify-between">
-//           <div>
-//             <h1 className="text-2xl font-bold">Fact Analyzer</h1>
-//             <p className="text-sm text-gray-400">
-//               Enter text and verify claims instantly
-//             </p>
-//           </div>
-
-//           {uiState === "results" && (
-//             <button
-//               onClick={handleReset}
-//               className="text-sm text-gray-300 border px-3 py-1 rounded"
-//             >
-//               New Analysis
-//             </button>
-//           )}
-//         </div>
-
-//         {/* Input */}
-//         <InputBox onAnalyze={handleAnalyze} isLoading={uiState === "loading"} />
-
-//         {/* STATES */}
-//         {uiState === "loading" && <Loader />}
-
-//         {uiState === "empty" && (
-//           <div className="text-center text-gray-400">
-//             Enter text to analyze
-//           </div>
-//         )}
-
-//         {/* RESULTS */}
-//         {uiState === "results" && results && (
-//           <div className="space-y-4">
-//             <AiDetectionBox probability={results.aiProbability} />
-
-//             {results.claims.map((claim, i) => (
-//               <ResultCard key={claim.id} {...claim} index={i} />
-//             ))}
-//           </div>
-//         )}
-//       </main>
+//     <div className={`db-topic-card ${warning.level}`}>
+//       <p className="db-topic-tag">Detected Topic</p>
+//       <p className="db-topic-name">{topic}</p>
+//       <p className="db-topic-msg">{warning.message}</p>
 //     </div>
-//   );
+//   )
 // }
 
-// import { useState } from "react";
-// import Navbar from "../components/Navbar";
-// import InputBox from "../components/InputBox";
-// import ProgressStepper from "../components/ProgressStepper";
-// import SummaryStats from "../components/SummaryStats";
-// import AnalyticsPanel from "../components/AnalyticsPanel";
-// import ClaimsList from "../components/ClaimsList";
-// import Footer from "../components/Footer";
-
+// /* ─── Main Dashboard ────────────────────────────────────────────── */
 // export default function Dashboard() {
-//   const [claims, setClaims] = useState([]);
-//   const [step, setStep] = useState(0);
+//   const [claims, setClaims]             = useState([])
+//   const [step, setStep]                 = useState(0)
+//   const [uiState, setUiState]           = useState("empty")
+//   const [aiProbability, setAiProbability] = useState(0)
+//   const [topic, setTopic]               = useState("general")
+//   const [warning, setWarning]           = useState(null)
+//   const [inputText, setInputText]       = useState("")
 
-//   // const handleVerify = async (input) => {
-//   //   setStep(1);
-
-//   //   // simulate pipeline steps
-//   //   setTimeout(() => setStep(2), 800);
-//   //   setTimeout(() => setStep(3), 1500);
-
-//   //   // replace with API call later
-//   //   const mockData = [
-//   //     {
-//   //       claim: "India has 30 states",
-//   //       verdict: "False",
-//   //       confidence: 92,
-//   //       explanation: "India currently has 28 states."
-//   //     },
-//   //     {
-//   //       claim: "Earth revolves around Sun",
-//   //       verdict: "True",
-//   //       confidence: 98,
-//   //       explanation: "Scientific consensus confirms this."
-//   //     }
-//   //   ];
-
-//   //   setTimeout(() => {
-//   //     setClaims(mockData);
-//   //     setStep(3);
-//   //   }, 1800);
-//   // };
-//   const handleVerify = async (input) => {
-//   setStep(1);
-
-//   try {
-//     setStep(2);
-
-//     const response = await fetch("http://localhost:8000/analyze", {
-//       method: "POST",
-//       headers: {
-//         "Content-Type": "application/json"
-//       },
-//       body: JSON.stringify({ text: input })
-//     });
-
-//     const data = await response.json();
-
-//     setStep(3);
-
-//     // ensure claims is always array
-//     if (Array.isArray(data.claims)) {
-//       setClaims(data.claims);
-//     } else {
-//       setClaims([]);
-//     }
-
-//   } catch (error) {
-//     console.error(error);
-//     setClaims([]);
-//   }
-// };
-
-//   const stats = {
-//     total: claims.length,
-//     true: claims.filter((c) => c.verdict === "True").length,
-//     false: claims.filter((c) => c.verdict === "False").length,
-//     reliability:
-//       claims.length > 0
-//         ? Math.round(
-//             (claims.filter((c) => c.verdict === "True").length /
-//               claims.length) *
-//               100
-//           )
-//         : 0
-//   };
-
-//   return (
-//     <div>
-//       <Navbar />
-
-//       <div className="container">
-//         <InputBox onVerify={handleVerify} />
-
-//         {step > 0 && <ProgressStepper step={step} />}
-
-//         {claims.length > 0 && (
-//           <>
-//             <SummaryStats stats={stats} />
-//             <AnalyticsPanel data={claims} />
-//             <ClaimsList claims={claims} />
-//           </>
-//         )}
-//       </div>
-
-//       <Footer />
-//     </div>
-//   );
-// }
-
-
-
-
-
-// import { useState } from "react";
-// import Navbar from "../components/Navbar";
-// import InputBox from "../components/InputBox";
-// import ProgressStepper from "../components/ProgressStepper";
-// import SummaryStats from "../components/SummaryStats";
-// import AnalyticsPanel from "../components/AnalyticsPanel";
-// import ClaimsList from "../components/ClaimsList";
-// import Footer from "../components/Footer";
-// import { useNavigate } from "react-router-dom";
-
-// export default function Dashboard() {
-//   const [claims, setClaims] = useState([]);
-//   const [step, setStep] = useState(0);
-//   const navigate = useNavigate();
+//   const { text: greetText, emoji } = getGreeting()
 
 //   const handleVerify = async (input) => {
-//     setStep(1);
+//     if (!input?.trim()) return
+//     setInputText(input.trim())
+//     setUiState("loading")
+//     setClaims([])
+//     setStep(1)
+
 //     try {
-//       setStep(2);
+//       setStep(2)
 //       const response = await fetch("http://localhost:8000/analyze", {
 //         method: "POST",
 //         headers: { "Content-Type": "application/json" },
-//         body: JSON.stringify({ text: input })
-//       });
-//       const data = await response.json();
-//       setStep(3);
-//       if (Array.isArray(data.claims)) {
-//         setClaims(data.claims);
-//       } else {
-//         setClaims([]);
-//       }
-//     } catch (error) {
-//       console.error(error);
-//       setClaims([]);
-//     }
-//   };
-
-//   const stats = {
-//     total: claims.length,
-//     true: claims.filter((c) => c.verdict === "True").length,
-//     false: claims.filter((c) => c.verdict === "False").length,
-//     reliability:
-//       claims.length > 0
-//         ? Math.round(
-//             (claims.filter((c) => c.verdict === "True").length / claims.length) * 100
-//           )
-//         : 0
-//   };
-
-//   return (
-//     <div style={{ minHeight: "100vh", background: "#05090f" }}>
-//       <Navbar />
-//       <div className="container">
-//         <InputBox onVerify={handleVerify} />
-//         {step > 0 && <ProgressStepper step={step} />}
-//         {claims.length > 0 && (
-//           <>
-//             <SummaryStats stats={stats} />
-//             <AnalyticsPanel data={claims} />
-//             <ClaimsList claims={claims} />
-//           </>
-//         )}
-//       </div>
-//       <Footer />
-//     </div>
-//   );
-// }
-
-
-
-// import { useState } from "react";
-// import Navbar from "../components/Navbar";
-// import InputBox from "../components/InputBox";
-// <<<<<<< HEAD
-// import ProgressStepper from "../components/ProgressStepper";
-// import SummaryStats from "../components/SummaryStats";
-// import AnalyticsPanel from "../components/AnalyticsPanel";
-// import ClaimsList from "../components/ClaimsList";
-// import Footer from "../components/Footer";
-// import { addSession } from "./HistoryStore";  // ← same folder
-// =======
-// import ResultCard from "../components/ResultCard";
-// import Loader from "../components/Loader";
-// import { analyzeText } from "../services/api";
-// import { downloadPDF } from "../services/api";
-// >>>>>>> 075452cdcc0fc0278e1d9348118ff89d9fffb089
-
-// export default function Dashboard() {
-//   const [claims, setClaims] = useState([]);
-//   const [step, setStep] = useState(0);
-
-//   const handleVerify = async (input) => {
-//     if (!input?.trim()) return;
-//     setStep(1);
-//     try {
-//       setStep(2);
-//       const response = await fetch("http://localhost:8000/analyze", {
-//         method: "POST",
-//         headers: { "Content-Type": "application/json" },
-//         body: JSON.stringify({ text: input })
-//       });
-//       const data = await response.json();
-//       setStep(3);
-
-// <<<<<<< HEAD
-//       if (Array.isArray(data.claims)) {
-//         setClaims(data.claims);
-//         addSession(input.trim(), data.claims); // ← save to history
-//       } else {
-//         setClaims([]);
-//       }
-// =======
-//       // 🔥 transform backend → frontend format
-//       const formatted = {
-//         aiProbability: data?.ai_detection?.ai_probability || 0,
-//         claims:
-//           data?.claims?.map((c, index) => ({
-//             id: index,
-//             claim: c.claim,
-//             verdict: mapVerdict(c.verdict),
-//             confidence: c.confidence,
-//             explanation: c.explanation,
-//             sources:
-//               c.sources?.map((s) => ({
-//                 label: s.label,
-//                 url: s.url,
-//                 score: s.score,
-//               })) || [],
-//           })) || [],
-//       };
-
-//       setResults(formatted);
-//       setUiState("results");
-// >>>>>>> 075452cdcc0fc0278e1d9348118ff89d9fffb089
-//     } catch (error) {
-//       console.error(error);
-//       setClaims([]);
-//     }
-//   };
-
-//   const stats = {
-//     total: claims.length,
-//     true: claims.filter((c) => c.verdict === "True").length,
-//     false: claims.filter((c) => c.verdict === "False").length,
-//     reliability:
-//       claims.length > 0
-//         ? Math.round(
-//             (claims.filter((c) => c.verdict === "True").length / claims.length) * 100
-//           )
-//         : 0
-//   };
-
-//   return (
-//     <div style={{ minHeight: "100vh", background: "#05090f" }}>
-//       <Navbar />
-// <<<<<<< HEAD
-//       <div className="container">
-//         <InputBox onVerify={handleVerify} />
-//         {step > 0 && <ProgressStepper step={step} />}
-//         {claims.length > 0 && (
-//           <>
-//             <SummaryStats stats={stats} />
-//             <AnalyticsPanel data={claims} />
-//             <ClaimsList claims={claims} />
-//           </>
-// =======
-
-//       <main className="max-w-3xl mx-auto p-6 space-y-5">
-//         {/* Header */}
-//         <div className="flex justify-between">
-//           <div>
-//             <h1 className="text-2xl font-bold">Fact Analyzer</h1>
-//             <p className="text-sm text-gray-400">
-//               Enter text and verify claims instantly
-//             </p>
-//           </div>
-
-//           {uiState === "results" && (
-//           <div className="flex gap-3">
-//             <button
-//               onClick={() => downloadPDF(results)}
-//               className="bg-green-600 text-white px-4 py-1 rounded hover:bg-green-700"
-//             >
-//               Download Report
-//             </button>
-
-//             <button
-//               onClick={handleReset}
-//               className="text-sm text-gray-300 border px-3 py-1 rounded"
-//             >
-//               New Analysis
-//             </button>
-//           </div>
-//         )}
-//         </div>
-
-//         {/* Input */}
-//         <InputBox onAnalyze={handleAnalyze} isLoading={uiState === "loading"} />
-
-//         {/* STATES */}
-//         {uiState === "loading" && <Loader />}
-
-//         {uiState === "empty" && (
-//           <div className="text-center text-gray-400">
-//             Enter text to analyze
-//           </div>
-// >>>>>>> 075452cdcc0fc0278e1d9348118ff89d9fffb089
-//         )}
-//       </div>
-//       <Footer />
-//     </div>
-//   );
-// }
-
-// import { useState } from "react";
-// import Navbar from "../components/Navbar";
-// import InputBox from "../components/InputBox";
-// import ProgressStepper from "../components/ProgressStepper";
-// import SummaryStats from "../components/SummaryStats";
-// import AnalyticsPanel from "../components/AnalyticsPanel";
-// import ClaimsList from "../components/ClaimsList";
-// import Loader from "../components/Loader";
-// import Footer from "../components/Footer";
-// import { addSession } from "/historyStore";
-// import { downloadPDF } from "../services/api";
-
-// // ─── Verdict normalizer ───────────────────────────────────────────
-// const mapVerdict = (v = '') => {
-//   const map = {
-//     'True':           'true',
-//     'False':          'false',
-//     'Partially True': 'partial',
-//   }
-//   return map[v] ?? 'unverifiable'
-// }
-
-// export default function Dashboard() {
-//   const [claims, setClaims]   = useState([]);
-//   const [step, setStep]       = useState(0);
-//   const [uiState, setUiState] = useState("empty"); // "empty" | "loading" | "results"
-
-//   const handleVerify = async (input) => {
-//     if (!input?.trim()) return;
-
-//     setUiState("loading");
-//     setClaims([]);
-//     setStep(1);
-
-//     try {
-//       setStep(2);
-
-//       const response = await fetch("http://localhost:8000/analyze", {
-//         method: "POST",
-//         headers: { "Content-Type": "application/json" },
-//         body: JSON.stringify({ text: input })
-//       });
-
-//       const data = await response.json();
-//       setStep(3);
+//         body: JSON.stringify({ text: input }),
+//       })
+//       const data = await response.json()
+//       setStep(3)
 
 //       if (Array.isArray(data.claims)) {
-//         // Normalise verdict casing for downstream components
-//         const normalised = data.claims.map((c) => ({
+//         const normalized = data.claims.map((c) => ({
 //           ...c,
 //           verdict: mapVerdict(c.verdict),
-//         }));
-//         setClaims(normalised);
-//         addSession(input.trim(), data.claims); // save raw API data to history
-//         setUiState("results");
+//         }))
+//         setClaims(normalized)
+//         setAiProbability(data?.ai_detection?.ai_probability || 0)
+//         setTopic(data?.topic || "general")
+//         setWarning(data?.warning || null)
+//         addSession(input.trim(), data.claims)
+//         setUiState("results")
 //       } else {
-//         setClaims([]);
-//         setUiState("empty");
+//         setClaims([])
+//         setUiState("empty")
 //       }
-//     } catch (error) {
-//       console.error(error);
-//       setClaims([]);
-//       setUiState("empty");
+//     } catch (err) {
+//       console.error(err)
+//       setClaims([])
+//       setUiState("empty")
 //     }
-//   };
+//   }
 
 //   const handleReset = () => {
-//     setUiState("empty");
-//     setClaims([]);
-//     setStep(0);
-//   };
+//     setUiState("empty")
+//     setClaims([])
+//     setStep(0)
+//     setInputText("")
+//   }
 
 //   const stats = {
-//     total: claims.length,
-//     true:  claims.filter((c) => c.verdict === "true").length,
-//     false: claims.filter((c) => c.verdict === "false").length,
-//     reliability:
-//       claims.length > 0
-//         ? Math.round(
-//             (claims.filter((c) => c.verdict === "true").length / claims.length) * 100
-//           )
-//         : 0,
-//   };
+//     total:       claims.length,
+//     true:        claims.filter((c) => c.verdict === "true").length,
+//     false:       claims.filter((c) => c.verdict === "false").length,
+//     reliability: claims.length > 0
+//       ? Math.round((claims.filter((c) => c.verdict === "true").length / claims.length) * 100)
+//       : 0,
+//   }
 
 //   return (
-//     <div style={{ minHeight: "100vh", background: "#05090f" }}>
-//       <Navbar />
+//     <>
+//       <style>{styles}</style>
 
-//       <div className="container">
+//       <div style={{ minHeight: "100vh", background: "#05090f" }}>
+//         <Navbar />
 
-//         {/* Page header */}
-//         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
-//           <div>
-//             <h1 style={{
-//               fontFamily: "'Orbitron', sans-serif",
-//               fontSize: "1.4rem",
-//               fontWeight: 700,
-//               color: "#e2f0ff",
-//               letterSpacing: "0.04em",
-//               marginBottom: 4,
-//               textShadow: "0 0 30px rgba(0,200,255,0.2)"
-//             }}>
-//               Fact Analyzer
-//             </h1>
-//             <p style={{ fontSize: "0.8rem", color: "rgba(255,255,255,0.35)" }}>
-//               Enter text and verify claims instantly
-//             </p>
-//           </div>
+//         {/* ── Hero + Search (shown only in empty/loading state) ── */}
+//         {uiState !== "results" && (
+//           <>
+//             <div className="db-hero">
+//               {/* Live status indicator */}
+//               <div className="db-greeting">
+//                 <span className="db-greeting-dot" />
+//                 {emoji} {greetText}
+//               </div>
 
-//           {uiState === "results" && (
-//             <div style={{ display: "flex", gap: 10 }}>
-//               <button
-//                 onClick={() => downloadPDF(claims)}
-//                 style={{
-//                   padding: "7px 16px",
-//                   borderRadius: 8,
-//                   fontSize: "0.75rem",
-//                   fontWeight: 600,
-//                   background: "rgba(34,197,94,0.12)",
-//                   border: "1px solid rgba(34,197,94,0.3)",
-//                   color: "#4ade80",
-//                   cursor: "pointer",
-//                   fontFamily: "'Inter', sans-serif",
-//                 }}
-//               >
-//                 Download Report
-//               </button>
-//               <button
-//                 onClick={handleReset}
-//                 style={{
-//                   padding: "7px 16px",
-//                   borderRadius: 8,
-//                   fontSize: "0.75rem",
-//                   fontWeight: 500,
-//                   background: "rgba(255,255,255,0.04)",
-//                   border: "1px solid rgba(255,255,255,0.1)",
-//                   color: "rgba(255,255,255,0.5)",
-//                   cursor: "pointer",
-//                   fontFamily: "'Inter', sans-serif",
-//                 }}
-//               >
-//                 New Analysis
-//               </button>
+//               {/* Main headline */}
+//               <h1 className="db-hero-title">
+//                 Your one-stop destination<br />
+//                 for <span>AI-powered fact checks</span>
+//               </h1>
+
+//               {/* Subtitle */}
+//               <p className="db-hero-sub">
+//                 Paste any claim, news headline, or statement below.
+//                 FactForge will verify it against trusted sources and give you
+//                 a confidence-scored verdict — instantly.
+//               </p>
 //             </div>
-//           )}
+
+//             {/* Search box */}
+//             <div className="db-search-area">
+//               <InputBox onVerify={handleVerify} />
+
+//               {/* Example chips — only in empty state */}
+//               {uiState === "empty" && (
+//                 <div className="db-examples">
+//                   {EXAMPLE_CLAIMS.map((claim, i) => (
+//                     <button
+//                       key={i}
+//                       className="db-example-chip"
+//                       onClick={() => handleVerify(claim)}
+//                     >
+//                       "{claim}"
+//                     </button>
+//                   ))}
+//                 </div>
+//               )}
+//             </div>
+//           </>
+//         )}
+
+//         {/* ── Loading state ── */}
+//         {uiState === "loading" && (
+//           <div className="db-process-area">
+//             <ProgressStepper step={step} />
+//             <Loader />
+//           </div>
+//         )}
+
+//         {/* ── Results ── */}
+//         {uiState === "results" && (
+//           <div className="db-results">
+
+//             {/* Results header */}
+//             <div className="db-results-header">
+//               <span className="db-results-label">
+//                 Analysis Results · {claims.length} claim{claims.length !== 1 ? "s" : ""} verified
+//               </span>
+//               <div className="db-results-actions">
+//                 <button className="db-btn-download" onClick={() => downloadPDF(claims)}>
+//                   <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+//                     <path d="M6.5 1v8M3.5 6.5l3 3 3-3M1 10.5h11" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+//                   </svg>
+//                   Download Report
+//                 </button>
+//                 <button className="db-btn-reset" onClick={handleReset}>
+//                   <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+//                     <path d="M2 6.5a4.5 4.5 0 1 1 1.2 3M2 10V7h3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+//                   </svg>
+//                   New Analysis
+//                 </button>
+//               </div>
+//             </div>
+
+//             {/* Query echo */}
+//             {inputText && (
+//               <div style={{
+//                 padding: "0.75rem 1rem",
+//                 background: "rgba(255,255,255,0.025)",
+//                 border: "1px solid rgba(255,255,255,0.06)",
+//                 borderRadius: 10,
+//                 fontFamily: "'Inter', sans-serif",
+//                 fontSize: "0.85rem",
+//                 color: "rgba(255,255,255,0.45)",
+//                 lineHeight: 1.55,
+//               }}>
+//                 <span style={{ color: "rgba(0,200,255,0.5)", fontSize: "0.65rem", letterSpacing: "0.1em", textTransform: "uppercase", marginRight: 8 }}>
+//                   Analyzed
+//                 </span>
+//                 {inputText.length > 160 ? inputText.slice(0, 160) + "…" : inputText}
+//               </div>
+//             )}
+
+//             {/* Topic warning */}
+//             <TopicWarning topic={topic} warning={warning} />
+
+//             {/* AI Detection */}
+//             <AiDetectionBox probability={aiProbability} />
+
+//             {/* Stats */}
+//             <SummaryStats stats={stats} />
+
+//             {/* Analytics charts */}
+//             <AnalyticsPanel data={claims} />
+
+//             {/* Claims list */}
+//             <ClaimsList claims={claims} />
+
+//           </div>
+//         )}
+
+//         <Footer />
+//       </div>
+//     </>
+//   )
+// }
+
+// import { useState, useEffect } from "react";
+// import { useLocation } from "react-router-dom";
+// import Navbar from "../components/Navbar";
+// import InputBox from "../components/InputBox";
+// import ProgressStepper from "../components/ProgressStepper";
+// import SummaryStats from "../components/SummaryStats";
+// import AnalyticsPanel from "../components/AnalyticsPanel";
+// import ClaimsList from "../components/ClaimsList";
+// import Loader from "../components/Loader";
+// import Footer from "../components/Footer";
+// import { addSession } from "./historyStore";
+// import { downloadPDF } from "../services/api";
+
+// /* ─── Scoped styles ─────────────────────────────────────────────── */
+// const styles = `
+//   @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
+
+//   /* ── Hero section ── */
+//   .db-hero {
+//     display: flex;
+//     flex-direction: column;
+//     align-items: center;
+//     justify-content: center;
+//     text-align: center;
+//     padding: 3.5rem 1rem 1.5rem;
+//     gap: 1rem;
+//     animation: heroIn 0.7s cubic-bezier(0.16,1,0.3,1) both;
+//   }
+
+//   @keyframes heroIn {
+//     from { opacity: 0; transform: translateY(20px); }
+//     to   { opacity: 1; transform: translateY(0); }
+//   }
+
+//   .db-greeting {
+//     font-family: 'Inter', sans-serif;
+//     font-size: 0.95rem;
+//     font-weight: 500;
+//     color: rgba(0,200,255,0.75);
+//     letter-spacing: 0.1em;
+//     text-transform: uppercase;
+//     display: flex;
+//     align-items: center;
+//     gap: 8px;
+//   }
+
+//   .db-greeting-dot {
+//     width: 7px; height: 7px;
+//     border-radius: 50%;
+//     background: #00d4ff;
+//     box-shadow: 0 0 10px rgba(0,212,255,0.9);
+//     animation: dotBlink 2s ease-in-out infinite;
+//   }
+
+//   @keyframes dotBlink {
+//     0%,100% { opacity: 1; }
+//     50%      { opacity: 0.3; }
+//   }
+
+//   .db-hero-title {
+//     font-family: 'Orbitron', sans-serif;
+//     font-size: clamp(1.8rem, 4vw, 2.8rem);
+//     font-weight: 700;
+//     color: #fff;
+//     letter-spacing: -0.01em;
+//     line-height: 1.2;
+//     text-shadow: 0 0 60px rgba(0,200,255,0.25), 0 0 120px rgba(0,150,255,0.1);
+//   }
+
+//   .db-hero-title span {
+//     background: linear-gradient(135deg, #00d4ff 0%, #7dd3fc 50%, #a5b4fc 100%);
+//     -webkit-background-clip: text;
+//     -webkit-text-fill-color: transparent;
+//     background-clip: text;
+//   }
+
+//   .db-hero-sub {
+//     font-family: 'Inter', sans-serif;
+//     font-size: 1.05rem;
+//     font-weight: 400;
+//     color: rgba(255,255,255,0.55);
+//     max-width: 520px;
+//     line-height: 1.65;
+//   }
+
+//   /* ── Search area (Claude/ChatGPT style) ── */
+//   .db-search-area {
+//     width: 100%;
+//     max-width: 760px;
+//     margin: 0 auto;
+//     padding: 0 1.5rem 2rem;
+//     animation: heroIn 0.8s cubic-bezier(0.16,1,0.3,1) 0.1s both;
+//   }
+
+//   /* ── Example prompts ── */
+//   .db-examples {
+//     display: flex;
+//     flex-wrap: wrap;
+//     gap: 8px;
+//     justify-content: center;
+//     margin-top: 1rem;
+//   }
+
+//   .db-example-chip {
+//     padding: 6px 14px;
+//     border-radius: 50px;
+//     font-family: 'Inter', sans-serif;
+//     font-size: 0.78rem;
+//     font-weight: 400;
+//     color: rgba(255,255,255,0.45);
+//     background: rgba(255,255,255,0.04);
+//     border: 1px solid rgba(255,255,255,0.09);
+//     cursor: pointer;
+//     transition: all 0.2s;
+//     white-space: nowrap;
+//   }
+//   .db-example-chip:hover {
+//     color: #00d4ff;
+//     border-color: rgba(0,200,255,0.3);
+//     background: rgba(0,180,255,0.08);
+//   }
+
+//   /* ── Results area ── */
+//   .db-results {
+//     width: 100%;
+//     max-width: 860px;
+//     margin: 0 auto;
+//     padding: 0 1.5rem 3rem;
+//     display: flex;
+//     flex-direction: column;
+//     gap: 1.4rem;
+//     animation: heroIn 0.5s cubic-bezier(0.16,1,0.3,1) both;
+//   }
+
+//   /* ── Results header bar ── */
+//   .db-results-header {
+//     display: flex;
+//     align-items: center;
+//     justify-content: space-between;
+//     flex-wrap: wrap;
+//     gap: 10px;
+//     padding-bottom: 0.25rem;
+//     border-bottom: 1px solid rgba(0,200,255,0.08);
+//   }
+
+//   .db-results-label {
+//     font-family: 'Orbitron', sans-serif;
+//     font-size: 0.75rem;
+//     font-weight: 600;
+//     letter-spacing: 0.12em;
+//     text-transform: uppercase;
+//     color: rgba(0,200,255,0.65);
+//   }
+
+//   .db-results-actions {
+//     display: flex;
+//     gap: 8px;
+//   }
+
+//   .db-btn-download {
+//     padding: 6px 16px;
+//     border-radius: 8px;
+//     font-family: 'Inter', sans-serif;
+//     font-size: 0.75rem;
+//     font-weight: 600;
+//     background: rgba(34,197,94,0.1);
+//     border: 1px solid rgba(34,197,94,0.3);
+//     color: #4ade80;
+//     cursor: pointer;
+//     display: flex;
+//     align-items: center;
+//     gap: 6px;
+//     transition: all 0.2s;
+//   }
+//   .db-btn-download:hover {
+//     background: rgba(34,197,94,0.18);
+//     border-color: rgba(34,197,94,0.5);
+//     box-shadow: 0 0 16px rgba(34,197,94,0.15);
+//   }
+
+//   .db-btn-reset {
+//     padding: 6px 16px;
+//     border-radius: 8px;
+//     font-family: 'Inter', sans-serif;
+//     font-size: 0.75rem;
+//     font-weight: 500;
+//     background: rgba(255,255,255,0.04);
+//     border: 1px solid rgba(255,255,255,0.1);
+//     color: rgba(255,255,255,0.45);
+//     cursor: pointer;
+//     display: flex;
+//     align-items: center;
+//     gap: 6px;
+//     transition: all 0.2s;
+//   }
+//   .db-btn-reset:hover {
+//     color: rgba(255,255,255,0.8);
+//     border-color: rgba(255,255,255,0.2);
+//     background: rgba(255,255,255,0.07);
+//   }
+
+//   /* ── AI Detection card ── */
+//   .db-ai-card {
+//     background: rgba(4,14,28,0.78);
+//     border: 1px solid;
+//     border-radius: 14px;
+//     padding: 1.2rem 1.4rem;
+//     backdrop-filter: blur(16px);
+//     box-shadow: 0 4px 24px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.04);
+//   }
+//   .db-ai-card.high   { border-color: rgba(239,68,68,0.28); }
+//   .db-ai-card.medium { border-color: rgba(245,158,11,0.28); }
+//   .db-ai-card.low    { border-color: rgba(34,197,94,0.22); }
+
+//   .db-ai-top {
+//     display: flex;
+//     justify-content: space-between;
+//     align-items: flex-start;
+//     margin-bottom: 0.9rem;
+//   }
+
+//   .db-ai-label-tag {
+//     font-family: 'Inter', sans-serif;
+//     font-size: 0.68rem;
+//     font-weight: 600;
+//     letter-spacing: 0.12em;
+//     text-transform: uppercase;
+//     color: rgba(255,255,255,0.35);
+//     margin-bottom: 4px;
+//   }
+
+//   .db-ai-verdict {
+//     font-family: 'Inter', sans-serif;
+//     font-size: 1.05rem;
+//     font-weight: 600;
+//   }
+//   .db-ai-verdict.high   { color: #f87171; }
+//   .db-ai-verdict.medium { color: #fbbf24; }
+//   .db-ai-verdict.low    { color: #4ade80; }
+
+//   .db-ai-pct {
+//     font-family: 'Orbitron', sans-serif;
+//     font-size: 2rem;
+//     font-weight: 700;
+//     line-height: 1;
+//   }
+//   .db-ai-pct.high   { color: #f87171; text-shadow: 0 0 20px rgba(248,113,113,0.4); }
+//   .db-ai-pct.medium { color: #fbbf24; text-shadow: 0 0 20px rgba(251,191,36,0.4); }
+//   .db-ai-pct.low    { color: #4ade80; text-shadow: 0 0 20px rgba(74,222,128,0.4); }
+
+//   .db-ai-track {
+//     height: 5px;
+//     background: rgba(255,255,255,0.07);
+//     border-radius: 99px;
+//     overflow: hidden;
+//   }
+
+//   .db-ai-bar {
+//     height: 100%;
+//     border-radius: 99px;
+//     transition: width 0.8s cubic-bezier(0.16,1,0.3,1);
+//   }
+//   .db-ai-bar.high   { background: linear-gradient(90deg, #dc2626, #f87171); box-shadow: 0 0 10px rgba(239,68,68,0.4); }
+//   .db-ai-bar.medium { background: linear-gradient(90deg, #d97706, #fbbf24); box-shadow: 0 0 10px rgba(245,158,11,0.4); }
+//   .db-ai-bar.low    { background: linear-gradient(90deg, #16a34a, #4ade80); box-shadow: 0 0 10px rgba(34,197,94,0.4); }
+
+//   /* ── Topic warning card ── */
+//   .db-topic-card {
+//     background: rgba(4,14,28,0.78);
+//     border-radius: 14px;
+//     padding: 1.1rem 1.4rem;
+//     backdrop-filter: blur(16px);
+//     display: flex;
+//     flex-direction: column;
+//     gap: 5px;
+//   }
+//   .db-topic-card.high   { border: 1px solid rgba(239,68,68,0.35); }
+//   .db-topic-card.medium { border: 1px solid rgba(245,158,11,0.35); }
+//   .db-topic-card.low    { border: 1px solid rgba(59,130,246,0.35); }
+
+//   .db-topic-tag {
+//     font-size: 0.62rem;
+//     font-weight: 600;
+//     letter-spacing: 0.14em;
+//     text-transform: uppercase;
+//     color: rgba(255,255,255,0.3);
+//   }
+
+//   .db-topic-name {
+//     font-family: 'Orbitron', sans-serif;
+//     font-size: 1rem;
+//     font-weight: 600;
+//     color: #e2f0ff;
+//     text-transform: capitalize;
+//   }
+
+//   .db-topic-msg {
+//     font-family: 'Inter', sans-serif;
+//     font-size: 0.85rem;
+//     color: rgba(255,255,255,0.55);
+//     line-height: 1.55;
+//   }
+
+//   /* ── Empty state ── */
+//   .db-empty {
+//     display: flex;
+//     flex-direction: column;
+//     align-items: center;
+//     gap: 10px;
+//     padding: 1.5rem 1rem 4rem;
+//     text-align: center;
+//   }
+
+//   .db-empty-hint {
+//     font-family: 'Inter', sans-serif;
+//     font-size: 0.78rem;
+//     color: rgba(255,255,255,0.18);
+//     letter-spacing: 0.05em;
+//   }
+
+//   /* ── Stepper / loader area ── */
+//   .db-process-area {
+//     max-width: 760px;
+//     margin: 0 auto;
+//     width: 100%;
+//     padding: 0 1.5rem;
+//   }
+
+//   /* ── Bigger, brighter text overrides ── */
+//   .db-results .ff-claim-text,
+//   .db-results .rc-claim-text {
+//     font-size: 0.95rem !important;
+//     color: #e2f0ff !important;
+//   }
+
+//   .db-results .rc-explanation,
+//   .db-results .ff-claim-explanation {
+//     font-size: 0.88rem !important;
+//     color: rgba(255,255,255,0.65) !important;
+//   }
+
+//   .db-results .stat-box h3 {
+//     font-size: 1.8rem !important;
+//   }
+
+//   .db-results .stat-box p {
+//     font-size: 0.72rem !important;
+//     color: rgba(255,255,255,0.45) !important;
+//   }
+// `
+
+// /* ─── Helpers ───────────────────────────────────────────────────── */
+// function getGreeting() {
+//   const h = new Date().getHours()
+//   if (h < 12) return { text: "Good Morning", emoji: "☀️" }
+//   if (h < 17) return { text: "Good Afternoon", emoji: "🌤️" }
+//   return { text: "Good Evening", emoji: "🌙" }
+// }
+
+// const EXAMPLE_CLAIMS = [
+//   "The Great Wall is visible from space",
+//   "Einstein failed math in school",
+//   "Humans only use 10% of their brain",
+//   "Lightning never strikes the same place twice",
+// ]
+
+// const mapVerdict = (v = "") => {
+//   if (v === "True")           return "true"
+//   if (v === "False")          return "false"
+//   if (v === "Partially True") return "partial"
+//   return "unverifiable"
+// }
+
+// /* ─── AI Detection Box ──────────────────────────────────────────── */
+// function AiDetectionBox({ probability }) {
+//   const pct   = probability || 0
+//   const level = pct >= 70 ? "high" : pct >= 40 ? "medium" : "low"
+//   const label = { high: "Likely AI-Generated", medium: "Possibly AI-Assisted", low: "Likely Human-Written" }
+
+//   return (
+//     <div className={`db-ai-card ${level}`}>
+//       <div className="db-ai-top">
+//         <div>
+//           <p className="db-ai-label-tag">AI Detection</p>
+//           <p className={`db-ai-verdict ${level}`}>{label[level]}</p>
 //         </div>
-
-//         {/* Input */}
-//         <InputBox onVerify={handleVerify} />
-
-//         {/* Progress stepper — only while processing */}
-//         {step > 0 && uiState !== "empty" && <ProgressStepper step={step} />}
-
-//         {/* Loading */}
-//         {uiState === "loading" && <Loader />}
-
-//         {/* Empty state */}
-//         {uiState === "empty" && (
-//           <div style={{
-//             textAlign: "center",
-//             padding: "3rem 1rem",
-//             color: "rgba(255,255,255,0.22)",
-//             fontFamily: "'Inter', sans-serif",
-//             fontSize: "0.85rem",
-//             letterSpacing: "0.04em",
-//           }}>
-//             Enter text above to start verifying claims
-//           </div>
-//         )}
-
-//         {/* RESULTS */}
-//         {uiState === "results" && results && (
-//           <div className="space-y-4">
-//             <AiDetectionBox probability={results.aiProbability} />
-
-//             {results.claims.map((claim, i) => (
-//               <ResultCard key={claim.id} {...claim} index={i} />
-//             ))}
-//           </div>
-//         )}
-//       </main>
-      
+//         <p className={`db-ai-pct ${level}`}>{pct}%</p>
+//       </div>
+//       <div className="db-ai-track">
+//         <div className={`db-ai-bar ${level}`} style={{ width: `${pct}%` }} />
+//       </div>
 //     </div>
-//   );
+//   )
+// }
+
+// /* ─── Topic Warning ─────────────────────────────────────────────── */
+// function TopicWarning({ topic, warning }) {
+//   if (!warning || warning.level === "none") return null
+//   return (
+//     <div className={`db-topic-card ${warning.level}`}>
+//       <p className="db-topic-tag">Detected Topic</p>
+//       <p className="db-topic-name">{topic}</p>
+//       <p className="db-topic-msg">{warning.message}</p>
+//     </div>
+//   )
+// }
+
+// /* ─── Main Dashboard ────────────────────────────────────────────── */
+// export default function Dashboard() {
+//   const [claims, setClaims]             = useState([])
+//   const [step, setStep]                 = useState(0)
+//   const [uiState, setUiState]           = useState("empty")
+//   const [aiProbability, setAiProbability] = useState(0)
+//   const [topic, setTopic]               = useState("general")
+//   const [warning, setWarning]           = useState(null)
+//   const [inputText, setInputText]       = useState("")
+
+//   const location = useLocation()
+
+//   const { text: greetText, emoji } = getGreeting()
+
+//   // Auto-trigger when navigated from History with re-analyze text
+//   useEffect(() => {
+//     if (location.state?.reanalyze) {
+//       handleVerify(location.state.reanalyze)
+//       window.history.replaceState({}, '')
+//     }
+//   }, []) // eslint-disable-line react-hooks/exhaustive-deps
+
+//   const handleVerify = async (input) => {
+//     if (!input?.trim()) return
+//     setInputText(input.trim())
+//     setUiState("loading")
+//     setClaims([])
+//     setStep(1)
+
+//     try {
+//       setStep(2)
+//       const response = await fetch("http://localhost:8000/analyze", {
+//         method: "POST",
+//         headers: { "Content-Type": "application/json" },
+//         body: JSON.stringify({ text: input }),
+//       })
+//       const data = await response.json()
+//       setStep(3)
+
+//       if (Array.isArray(data.claims)) {
+//         const normalized = data.claims.map((c) => ({
+//           ...c,
+//           verdict: mapVerdict(c.verdict),
+//         }))
+//         setClaims(normalized)
+//         setAiProbability(data?.ai_detection?.ai_probability || 0)
+//         setTopic(data?.topic || "general")
+//         setWarning(data?.warning || null)
+//         addSession(input.trim(), data.claims)
+//         setUiState("results")
+//       } else {
+//         setClaims([])
+//         setUiState("empty")
+//       }
+//     } catch (err) {
+//       console.error(err)
+//       setClaims([])
+//       setUiState("empty")
+//     }
+//   }
+
+//   const handleReset = () => {
+//     setUiState("empty")
+//     setClaims([])
+//     setStep(0)
+//     setInputText("")
+//   }
+
+//   const stats = {
+//     total:       claims.length,
+//     true:        claims.filter((c) => c.verdict === "true").length,
+//     false:       claims.filter((c) => c.verdict === "false").length,
+//     reliability: claims.length > 0
+//       ? Math.round((claims.filter((c) => c.verdict === "true").length / claims.length) * 100)
+//       : 0,
+//   }
+//   const preparePDFData = () => ({
+//   aiProbability,
+//   claims: claims.map((c) => ({
+//     claim: c.claim,
+//     verdict: c.verdict,
+//     confidence: c.confidence,
+//     explanation: c.explanation,
+//   })),
+// });
+
+//   return (
+//     <>
+//       <style>{styles}</style>
+
+//       <div style={{ minHeight: "100vh", background: "#05090f", display: "flex", flexDirection: "column" }}>
+//         <Navbar />
+
+//         {/* ── Main content (flex: 1 pushes footer to bottom) ── */}
+//         <div style={{ flex: 1 }}>
+
+//         {/* ── Hero + Search (shown only in empty/loading state) ── */}
+//         {uiState !== "results" && (
+//           <>
+//             <div className="db-hero">
+//               {/* Live status indicator */}
+//               <div className="db-greeting">
+//                 <span className="db-greeting-dot" />
+//                 {emoji} {greetText}
+//               </div>
+
+//               {/* Main headline */}
+//               <h1 className="db-hero-title">
+//                 Your one-stop destination<br />
+//                 for <span>AI-powered fact checks</span>
+//               </h1>
+
+//               {/* Subtitle */}
+//               <p className="db-hero-sub">
+//                 Paste any claim, news headline, or statement below.
+//                 FactForge will verify it against trusted sources and give you
+//                 a confidence-scored verdict — instantly.
+//               </p>
+//             </div>
+
+//             {/* Search box */}
+//             <div className="db-search-area">
+//               <InputBox onVerify={handleVerify} />
+
+//               {/* Example chips — only in empty state */}
+//               {uiState === "empty" && (
+//                 <div className="db-examples">
+//                   {EXAMPLE_CLAIMS.map((claim, i) => (
+//                     <button
+//                       key={i}
+//                       className="db-example-chip"
+//                       onClick={() => handleVerify(claim)}
+//                     >
+//                       "{claim}"
+//                     </button>
+//                   ))}
+//                 </div>
+//               )}
+//             </div>
+//           </>
+//         )}
+
+//         {/* ── Loading state ── */}
+//         {uiState === "loading" && (
+//           <div className="db-process-area">
+//             <ProgressStepper step={step} />
+//             <Loader />
+//           </div>
+//         )}
+
+//         {/* ── Results ── */}
+//         {uiState === "results" && (
+//           <div className="db-results">
+
+//             {/* Results header */}
+//             <div className="db-results-header">
+//               <span className="db-results-label">
+//                 Analysis Results · {claims.length} claim{claims.length !== 1 ? "s" : ""} verified
+//               </span>
+//               <div className="db-results-actions">
+//                 <button className="db-btn-download" onClick={() => downloadPDF(preparePDFData())}>
+//                   <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+//                     <path d="M6.5 1v8M3.5 6.5l3 3 3-3M1 10.5h11" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+//                   </svg>
+//                   Download Report
+//                 </button>
+//                 <button className="db-btn-reset" onClick={handleReset}>
+//                   <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+//                     <path d="M2 6.5a4.5 4.5 0 1 1 1.2 3M2 10V7h3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+//                   </svg>
+//                   New Analysis
+//                 </button>
+//               </div>
+//             </div>
+
+//             {/* Query echo */}
+//             {inputText && (
+//               <div style={{
+//                 padding: "0.75rem 1rem",
+//                 background: "rgba(255,255,255,0.025)",
+//                 border: "1px solid rgba(255,255,255,0.06)",
+//                 borderRadius: 10,
+//                 fontFamily: "'Inter', sans-serif",
+//                 fontSize: "0.85rem",
+//                 color: "rgba(255,255,255,0.45)",
+//                 lineHeight: 1.55,
+//               }}>
+//                 <span style={{ color: "rgba(0,200,255,0.5)", fontSize: "0.65rem", letterSpacing: "0.1em", textTransform: "uppercase", marginRight: 8 }}>
+//                   Analyzed
+//                 </span>
+//                 {inputText.length > 160 ? inputText.slice(0, 160) + "…" : inputText}
+//               </div>
+//             )}
+
+//             {/* Topic warning */}
+//             <TopicWarning topic={topic} warning={warning} />
+
+//             {/* AI Detection */}
+//             <AiDetectionBox probability={aiProbability} />
+
+//             {/* Stats */}
+//             <SummaryStats stats={stats} />
+
+//             {/* Analytics charts */}
+//             <AnalyticsPanel data={claims} />
+
+//             {/* Claims list */}
+//             <ClaimsList claims={claims} />
+
+//           </div>
+//         )}
+
+//         </div>{/* end flex-1 main content */}
+
+//         <Footer />
+//       </div>
+//     </>
+//   )
 // }
 
 
 
 
-
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useLocation } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import InputBox from "../components/InputBox";
 import ProgressStepper from "../components/ProgressStepper";
@@ -684,171 +1244,717 @@ import AnalyticsPanel from "../components/AnalyticsPanel";
 import ClaimsList from "../components/ClaimsList";
 import Loader from "../components/Loader";
 import Footer from "../components/Footer";
-import { addSession } from "./HistoryStore";
+import { addSession } from "./historyStore";
 import { downloadPDF } from "../services/api";
 
-/* AI Detection Box */
-function AiDetectionBox({ probability }) {
-  const pct = probability || 0;
-  const level = pct >= 70 ? "high" : pct >= 40 ? "medium" : "low";
+/* ─── Scoped styles ─────────────────────────────────────────────── */
+const styles = `
+  @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
 
-  const colors = {
-    high: {
-      text: "text-red-400",
-      bar: "from-red-600 to-red-400",
-      bg: "bg-red-500/10 border-red-500/25",
-      label: "Likely AI-Generated",
-    },
-    medium: {
-      text: "text-amber-400",
-      bar: "from-amber-600 to-amber-400",
-      bg: "bg-amber-500/10 border-amber-500/25",
-      label: "Possibly AI-Assisted",
-    },
-    low: {
-      text: "text-emerald-400",
-      bar: "from-emerald-600 to-emerald-400",
-      bg: "bg-emerald-500/10 border-emerald-500/25",
-      label: "Likely Human-Written",
-    },
-  };
+  /* ── Fixed animated background ── */
+  .db-bg {
+    position: fixed;
+    inset: 0;
+    width: 100%; height: 100%;
+    z-index: 0;
+    pointer-events: none;
+  }
 
-  const c = colors[level];
+  /* Ensure all dashboard content sits above bg */
+  .db-above {
+    position: relative;
+    z-index: 1;
+  }
 
-  return (
-    <div className={`card p-5 border ${c.bg}`}>
-      <div className="flex justify-between">
-        <div>
-          <p className="text-xs text-gray-400 uppercase">AI Detection</p>
-          <p className={`font-semibold ${c.text}`}>{c.label}</p>
-        </div>
-        <p className={`text-3xl font-bold ${c.text}`}>{pct}%</p>
-      </div>
+  /* ── Hero section ── */
+  .db-hero {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 3.5rem 1rem 1.5rem;
+    gap: 1rem;
+    animation: heroIn 0.7s cubic-bezier(0.16,1,0.3,1) both;
+  }
 
-      <div className="mt-3 h-2 bg-gray-700 rounded">
-        <div
-          className={`h-full bg-gradient-to-r ${c.bar}`}
-          style={{ width: `${pct}%` }}
-        />
-      </div>
-    </div>
-  );
+  @keyframes heroIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .db-greeting {
+    font-family: 'Inter', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: rgba(0,200,255,0.75);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .db-greeting-dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: #00d4ff;
+    box-shadow: 0 0 10px rgba(0,212,255,0.9);
+    animation: dotBlink 2s ease-in-out infinite;
+  }
+
+  @keyframes dotBlink {
+    0%,100% { opacity: 1; }
+    50%      { opacity: 0.3; }
+  }
+
+  .db-hero-title {
+    font-family: 'Orbitron', sans-serif;
+    font-size: clamp(1.8rem, 4vw, 2.8rem);
+    font-weight: 700;
+    color: #fff;
+    letter-spacing: -0.01em;
+    line-height: 1.2;
+    text-shadow: 0 0 60px rgba(0,200,255,0.25), 0 0 120px rgba(0,150,255,0.1);
+  }
+
+  .db-hero-title span {
+    background: linear-gradient(135deg, #00d4ff 0%, #7dd3fc 50%, #a5b4fc 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .db-hero-sub {
+    font-family: 'Inter', sans-serif;
+    font-size: 1.05rem;
+    font-weight: 400;
+    color: rgba(255,255,255,0.55);
+    max-width: 520px;
+    line-height: 1.65;
+  }
+
+  /* ── Search area (Claude/ChatGPT style) ── */
+  .db-search-area {
+    width: 100%;
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 0 1.5rem 2rem;
+    animation: heroIn 0.8s cubic-bezier(0.16,1,0.3,1) 0.1s both;
+  }
+
+  /* ── Example prompts ── */
+  .db-examples {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+    margin-top: 1rem;
+  }
+
+  .db-example-chip {
+    padding: 6px 14px;
+    border-radius: 50px;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.78rem;
+    font-weight: 400;
+    color: rgba(255,255,255,0.45);
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.09);
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+  .db-example-chip:hover {
+    color: #00d4ff;
+    border-color: rgba(0,200,255,0.3);
+    background: rgba(0,180,255,0.08);
+  }
+
+  /* ── Results area ── */
+  .db-results {
+    width: 100%;
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 0 1.5rem 3rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.4rem;
+    animation: heroIn 0.5s cubic-bezier(0.16,1,0.3,1) both;
+  }
+
+  /* ── Results header bar ── */
+  .db-results-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding-bottom: 0.25rem;
+    border-bottom: 1px solid rgba(0,200,255,0.08);
+  }
+
+  .db-results-label {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: rgba(0,200,255,0.65);
+  }
+
+  .db-results-actions {
+    display: flex;
+    gap: 8px;
+  }
+
+  .db-btn-download {
+    padding: 6px 16px;
+    border-radius: 8px;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.75rem;
+    font-weight: 600;
+    background: rgba(34,197,94,0.1);
+    border: 1px solid rgba(34,197,94,0.3);
+    color: #4ade80;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.2s;
+  }
+  .db-btn-download:hover {
+    background: rgba(34,197,94,0.18);
+    border-color: rgba(34,197,94,0.5);
+    box-shadow: 0 0 16px rgba(34,197,94,0.15);
+  }
+
+  .db-btn-reset {
+    padding: 6px 16px;
+    border-radius: 8px;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.75rem;
+    font-weight: 500;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.1);
+    color: rgba(255,255,255,0.45);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.2s;
+  }
+  .db-btn-reset:hover {
+    color: rgba(255,255,255,0.8);
+    border-color: rgba(255,255,255,0.2);
+    background: rgba(255,255,255,0.07);
+  }
+
+  /* ── AI Detection card ── */
+  .db-ai-card {
+    background: rgba(4,14,28,0.78);
+    border: 1px solid;
+    border-radius: 14px;
+    padding: 1.2rem 1.4rem;
+    backdrop-filter: blur(16px);
+    box-shadow: 0 4px 24px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.04);
+  }
+  .db-ai-card.high   { border-color: rgba(239,68,68,0.28); }
+  .db-ai-card.medium { border-color: rgba(245,158,11,0.28); }
+  .db-ai-card.low    { border-color: rgba(34,197,94,0.22); }
+
+  .db-ai-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 0.9rem;
+  }
+
+  .db-ai-label-tag {
+    font-family: 'Inter', sans-serif;
+    font-size: 0.68rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.35);
+    margin-bottom: 4px;
+  }
+
+  .db-ai-verdict {
+    font-family: 'Inter', sans-serif;
+    font-size: 1.05rem;
+    font-weight: 600;
+  }
+  .db-ai-verdict.high   { color: #f87171; }
+  .db-ai-verdict.medium { color: #fbbf24; }
+  .db-ai-verdict.low    { color: #4ade80; }
+
+  .db-ai-pct {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 2rem;
+    font-weight: 700;
+    line-height: 1;
+  }
+  .db-ai-pct.high   { color: #f87171; text-shadow: 0 0 20px rgba(248,113,113,0.4); }
+  .db-ai-pct.medium { color: #fbbf24; text-shadow: 0 0 20px rgba(251,191,36,0.4); }
+  .db-ai-pct.low    { color: #4ade80; text-shadow: 0 0 20px rgba(74,222,128,0.4); }
+
+  .db-ai-track {
+    height: 5px;
+    background: rgba(255,255,255,0.07);
+    border-radius: 99px;
+    overflow: hidden;
+  }
+
+  .db-ai-bar {
+    height: 100%;
+    border-radius: 99px;
+    transition: width 0.8s cubic-bezier(0.16,1,0.3,1);
+  }
+  .db-ai-bar.high   { background: linear-gradient(90deg, #dc2626, #f87171); box-shadow: 0 0 10px rgba(239,68,68,0.4); }
+  .db-ai-bar.medium { background: linear-gradient(90deg, #d97706, #fbbf24); box-shadow: 0 0 10px rgba(245,158,11,0.4); }
+  .db-ai-bar.low    { background: linear-gradient(90deg, #16a34a, #4ade80); box-shadow: 0 0 10px rgba(34,197,94,0.4); }
+
+  /* ── Topic warning card ── */
+  .db-topic-card {
+    background: rgba(4,14,28,0.78);
+    border-radius: 14px;
+    padding: 1.1rem 1.4rem;
+    backdrop-filter: blur(16px);
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+  .db-topic-card.high   { border: 1px solid rgba(239,68,68,0.35); }
+  .db-topic-card.medium { border: 1px solid rgba(245,158,11,0.35); }
+  .db-topic-card.low    { border: 1px solid rgba(59,130,246,0.35); }
+
+  .db-topic-tag {
+    font-size: 0.62rem;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.3);
+  }
+
+  .db-topic-name {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1rem;
+    font-weight: 600;
+    color: #e2f0ff;
+    text-transform: capitalize;
+  }
+
+  .db-topic-msg {
+    font-family: 'Inter', sans-serif;
+    font-size: 0.85rem;
+    color: rgba(255,255,255,0.55);
+    line-height: 1.55;
+  }
+
+  /* ── Empty state ── */
+  .db-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    padding: 1.5rem 1rem 4rem;
+    text-align: center;
+  }
+
+  .db-empty-hint {
+    font-family: 'Inter', sans-serif;
+    font-size: 0.78rem;
+    color: rgba(255,255,255,0.18);
+    letter-spacing: 0.05em;
+  }
+
+  /* ── Stepper / loader area ── */
+  .db-process-area {
+    max-width: 760px;
+    margin: 0 auto;
+    width: 100%;
+    padding: 0 1.5rem;
+  }
+
+  /* ── Bigger, brighter text overrides ── */
+  .db-results .ff-claim-text,
+  .db-results .rc-claim-text {
+    font-size: 0.95rem !important;
+    color: #e2f0ff !important;
+  }
+
+  .db-results .rc-explanation,
+  .db-results .ff-claim-explanation {
+    font-size: 0.88rem !important;
+    color: rgba(255,255,255,0.65) !important;
+  }
+
+  .db-results .stat-box h3 {
+    font-size: 1.8rem !important;
+  }
+
+  .db-results .stat-box p {
+    font-size: 0.72rem !important;
+    color: rgba(255,255,255,0.45) !important;
+  }
+`
+
+/* ─── Helpers ───────────────────────────────────────────────────── */
+function getGreeting() {
+  const h = new Date().getHours()
+  if (h < 12) return { text: "Good Morning", emoji: "☀️" }
+  if (h < 17) return { text: "Good Afternoon", emoji: "🌤️" }
+  return { text: "Good Evening", emoji: "🌙" }
 }
 
-/* Topic Warning */
-function TopicWarning({ topic, warning }) {
-  if (!warning || warning.level === "none") return null;
+const EXAMPLE_CLAIMS = [
+  "The Great Wall is visible from space",
+  "Einstein failed math in school",
+  "Humans only use 10% of their brain",
+  "Lightning never strikes the same place twice",
+]
 
-  const styles = {
-    high: "bg-red-500/10 border-red-500/40 text-red-300",
-    medium: "bg-yellow-500/10 border-yellow-500/40 text-yellow-300",
-    low: "bg-blue-500/10 border-blue-500/40 text-blue-300",
-  };
-
+/* ─── Dashboard Background — aurora streaks + hex dot grid ─────── */
+function DashboardBg() {
   return (
-    <div className={`card border p-5 rounded-xl ${styles[warning.level]}`}>
-      <p className="text-xs uppercase text-gray-400">Detected Topic</p>
-      <h2 className="text-xl font-bold capitalize">{topic}</h2>
-      <p className="mt-2 text-sm">{warning.message}</p>
-    </div>
-  );
+    <svg className="db-bg" viewBox="0 0 100 100" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <radialGradient id="dbBase" cx="50%" cy="30%" r="80%">
+          <stop offset="0%"   stopColor="#060d1c" stopOpacity="1"/>
+          <stop offset="100%" stopColor="#05090f" stopOpacity="1"/>
+        </radialGradient>
+        <linearGradient id="dbAurora1" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%"   stopColor="#0077cc" stopOpacity="0"/>
+          <stop offset="40%"  stopColor="#00aaff" stopOpacity="0.07"/>
+          <stop offset="60%"  stopColor="#00ccff" stopOpacity="0.09"/>
+          <stop offset="100%" stopColor="#0055aa" stopOpacity="0"/>
+        </linearGradient>
+        <linearGradient id="dbAurora2" x1="100%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%"   stopColor="#4400cc" stopOpacity="0"/>
+          <stop offset="45%"  stopColor="#6633ff" stopOpacity="0.05"/>
+          <stop offset="55%"  stopColor="#8855ff" stopOpacity="0.06"/>
+          <stop offset="100%" stopColor="#3300aa" stopOpacity="0"/>
+        </linearGradient>
+        <radialGradient id="dbTopGlow" cx="50%" cy="0%" r="60%">
+          <stop offset="0%"   stopColor="#003399" stopOpacity="0.15"/>
+          <stop offset="100%" stopColor="#003399" stopOpacity="0"/>
+        </radialGradient>
+        <radialGradient id="dbCorner" cx="100%" cy="100%" r="50%">
+          <stop offset="0%"   stopColor="#002255" stopOpacity="0.18"/>
+          <stop offset="100%" stopColor="#002255" stopOpacity="0"/>
+        </radialGradient>
+      </defs>
+
+      <rect width="100" height="100" fill="url(#dbBase)"/>
+      <rect width="100" height="60"  fill="url(#dbTopGlow)"/>
+      <rect width="100" height="100" fill="url(#dbCorner)"/>
+
+      {/* Aurora sweeps */}
+      <rect width="100" height="100" fill="url(#dbAurora1)">
+        <animate attributeName="opacity" values="0.7;1;0.7" dur="9s" repeatCount="indefinite"/>
+      </rect>
+      <rect width="100" height="100" fill="url(#dbAurora2)">
+        <animate attributeName="opacity" values="0.6;1;0.6" dur="13s" repeatCount="indefinite"/>
+      </rect>
+
+      {/* Hex dot grid rows — faint pulsing dots */}
+      {[8,24,40,56,72,88].map((x,i) => (
+        <circle key={`a${i}`} cx={x} cy="12" r="0.32" fill="rgba(0,180,255,0.18)">
+          <animate attributeName="opacity" values="0.18;0.45;0.18" dur={`${5+i}s`} repeatCount="indefinite" begin={`${i*0.4}s`}/>
+        </circle>
+      ))}
+      {[16,32,48,64,80,96].map((x,i) => (
+        <circle key={`b${i}`} cx={x} cy="22" r="0.32" fill="rgba(0,180,255,0.14)">
+          <animate attributeName="opacity" values="0.14;0.38;0.14" dur={`${6+i}s`} repeatCount="indefinite" begin={`${i*0.5+0.3}s`}/>
+        </circle>
+      ))}
+      {[8,24,40,56,72,88].map((x,i) => (
+        <circle key={`c${i}`} cx={x} cy="32" r="0.32" fill="rgba(0,180,255,0.1)">
+          <animate attributeName="opacity" values="0.1;0.28;0.1" dur={`${7+i}s`} repeatCount="indefinite" begin={`${i*0.6}s`}/>
+        </circle>
+      ))}
+      {[16,32,48,64,80].map((x,i) => (
+        <circle key={`d${i}`} cx={x} cy="50" r="0.28" fill="rgba(100,150,255,0.09)">
+          <animate attributeName="opacity" values="0.09;0.22;0.09" dur={`${8+i}s`} repeatCount="indefinite" begin={`${i*0.7}s`}/>
+        </circle>
+      ))}
+      {[8,24,40,56,72,88].map((x,i) => (
+        <circle key={`e${i}`} cx={x} cy="68" r="0.28" fill="rgba(100,150,255,0.07)">
+          <animate attributeName="opacity" values="0.07;0.18;0.07" dur={`${9+i}s`} repeatCount="indefinite" begin={`${i*0.4+1}s`}/>
+        </circle>
+      ))}
+      {[16,32,48,64,80].map((x,i) => (
+        <circle key={`f${i}`} cx={x} cy="85" r="0.28" fill="rgba(100,150,255,0.06)">
+          <animate attributeName="opacity" values="0.06;0.15;0.06" dur={`${7+i}s`} repeatCount="indefinite" begin={`${i*0.5+2}s`}/>
+        </circle>
+      ))}
+
+      {/* Diagonal accent lines — barely visible */}
+      <line x1="0"   y1="35" x2="45"  y2="0"   stroke="rgba(0,150,255,0.045)" strokeWidth="0.25"/>
+      <line x1="55"  y1="100" x2="100" y2="65"  stroke="rgba(0,150,255,0.045)" strokeWidth="0.25"/>
+      <line x1="100" y1="20" x2="70"  y2="0"   stroke="rgba(120,80,255,0.035)" strokeWidth="0.25"/>
+      <line x1="0"   y1="80" x2="30"  y2="100" stroke="rgba(120,80,255,0.035)" strokeWidth="0.25"/>
+    </svg>
+  )
 }
 
-/* Verdict mapping */
 const mapVerdict = (v = "") => {
-  if (v === "True") return "true";
-  if (v === "False") return "false";
-  if (v === "Partially True") return "partial";
-  return "unverifiable";
-};
+  if (v === "True")           return "true"
+  if (v === "False")          return "false"
+  if (v === "Partially True") return "partial"
+  return "unverifiable"
+}
 
+/* ─── AI Detection Box ──────────────────────────────────────────── */
+function AiDetectionBox({ probability }) {
+  const pct   = probability || 0
+  const level = pct >= 70 ? "high" : pct >= 40 ? "medium" : "low"
+  const label = { high: "Likely AI-Generated", medium: "Possibly AI-Assisted", low: "Likely Human-Written" }
+
+  return (
+    <div className={`db-ai-card ${level}`}>
+      <div className="db-ai-top">
+        <div>
+          <p className="db-ai-label-tag">AI Detection</p>
+          <p className={`db-ai-verdict ${level}`}>{label[level]}</p>
+        </div>
+        <p className={`db-ai-pct ${level}`}>{pct}%</p>
+      </div>
+      <div className="db-ai-track">
+        <div className={`db-ai-bar ${level}`} style={{ width: `${pct}%` }} />
+      </div>
+    </div>
+  )
+}
+
+/* ─── Topic Warning ─────────────────────────────────────────────── */
+function TopicWarning({ topic, warning }) {
+  if (!warning || warning.level === "none") return null
+  return (
+    <div className={`db-topic-card ${warning.level}`}>
+      <p className="db-topic-tag">Detected Topic</p>
+      <p className="db-topic-name">{topic}</p>
+      <p className="db-topic-msg">{warning.message}</p>
+    </div>
+  )
+}
+
+/* ─── Main Dashboard ────────────────────────────────────────────── */
 export default function Dashboard() {
-  const [claims, setClaims] = useState([]);
-  const [step, setStep] = useState(0);
-  const [uiState, setUiState] = useState("empty");
-  const [aiProbability, setAiProbability] = useState(0);
-  const [topic, setTopic] = useState("general");
-  const [warning, setWarning] = useState(null);
+  const [claims, setClaims]             = useState([])
+  const [step, setStep]                 = useState(0)
+  const [uiState, setUiState]           = useState("empty")
+  const [aiProbability, setAiProbability] = useState(0)
+  const [topic, setTopic]               = useState("general")
+  const [warning, setWarning]           = useState(null)
+  const [inputText, setInputText]       = useState("")
+
+  const location = useLocation()
+
+  const { text: greetText, emoji } = getGreeting()
+
+  // Auto-trigger when navigated from History with re-analyze text
+  useEffect(() => {
+    if (location.state?.reanalyze) {
+      handleVerify(location.state.reanalyze)
+      window.history.replaceState({}, '')
+    }
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleVerify = async (input) => {
-    if (!input?.trim()) return;
-
-    setUiState("loading");
-    setClaims([]);
-    setStep(1);
+    if (!input?.trim()) return
+    setInputText(input.trim())
+    setUiState("loading")
+    setClaims([])
+    setStep(1)
 
     try {
-      setStep(2);
-
+      setStep(2)
       const response = await fetch("http://localhost:8000/analyze", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ text: input }),
-      });
-
-      const data = await response.json();
-      setStep(3);
+      })
+      const data = await response.json()
+      setStep(3)
 
       if (Array.isArray(data.claims)) {
         const normalized = data.claims.map((c) => ({
           ...c,
           verdict: mapVerdict(c.verdict),
-        }));
-
-        setClaims(normalized);
-        setAiProbability(data?.ai_detection?.ai_probability || 0);
-        setTopic(data?.topic || "general");
-        setWarning(data?.warning || null);
-
-        addSession(input.trim(), data.claims);
-        setUiState("results");
+        }))
+        setClaims(normalized)
+        setAiProbability(data?.ai_detection?.ai_probability || 0)
+        setTopic(data?.topic || "general")
+        setWarning(data?.warning || null)
+        addSession(input.trim(), data.claims)
+        setUiState("results")
       } else {
-        setClaims([]);
-        setUiState("empty");
+        setClaims([])
+        setUiState("empty")
       }
     } catch (err) {
-      console.error(err);
-      setClaims([]);
-      setUiState("empty");
+      console.error(err)
+      setClaims([])
+      setUiState("empty")
     }
-  };
+  }
+
+  const handleReset = () => {
+    setUiState("empty")
+    setClaims([])
+    setStep(0)
+    setInputText("")
+  }
 
   const stats = {
-    total: claims.length,
-    true: claims.filter((c) => c.verdict === "true").length,
-    false: claims.filter((c) => c.verdict === "false").length,
-    reliability:
-      claims.length > 0
-        ? Math.round(
-            (claims.filter((c) => c.verdict === "true").length /
-              claims.length) *
-              100
-          )
-        : 0,
-  };
+    total:       claims.length,
+    true:        claims.filter((c) => c.verdict === "true").length,
+    false:       claims.filter((c) => c.verdict === "false").length,
+    reliability: claims.length > 0
+      ? Math.round((claims.filter((c) => c.verdict === "true").length / claims.length) * 100)
+      : 0,
+  }
 
   return (
-    <div style={{ minHeight: "100vh", background: "#05090f" }}>
-      <Navbar />
+    <>
+      <style>{styles}</style>
 
-      <div className="container">
-        <InputBox onVerify={handleVerify} />
+      <div style={{ minHeight: "100vh", background: "#05090f", display: "flex", flexDirection: "column" }}>
 
-        {uiState === "loading" && <Loader />}
+        {/* Fixed animated background */}
+        <DashboardBg />
 
-        {uiState === "results" && (
+        <div className="db-above">
+          <Navbar />
+        </div>
+
+        {/* ── Main content (flex: 1 pushes footer to bottom) ── */}
+        <div style={{ flex: 1 }} className="db-above">
+
+        {/* ── Hero + Search (shown only in empty/loading state) ── */}
+        {uiState !== "results" && (
           <>
-            <TopicWarning topic={topic} warning={warning} />
-            <AiDetectionBox probability={aiProbability} />
-            <SummaryStats stats={stats} />
-            <AnalyticsPanel data={claims} />
-            <ClaimsList claims={claims} />
+            <div className="db-hero">
+              {/* Live status indicator */}
+              <div className="db-greeting">
+                <span className="db-greeting-dot" />
+                {emoji} {greetText}
+              </div>
+
+              {/* Main headline */}
+              <h1 className="db-hero-title">
+                Your one-stop destination<br />
+                for <span>AI-powered fact checks</span>
+              </h1>
+
+              {/* Subtitle */}
+              <p className="db-hero-sub">
+                Paste any claim, news headline, or statement below.
+                FactForge will verify it against trusted sources and give you
+                a confidence-scored verdict — instantly.
+              </p>
+            </div>
+
+            {/* Search box */}
+            <div className="db-search-area">
+              <InputBox onVerify={handleVerify} />
+
+              {/* Example chips — only in empty state */}
+              {uiState === "empty" && (
+                <div className="db-examples">
+                  {EXAMPLE_CLAIMS.map((claim, i) => (
+                    <button
+                      key={i}
+                      className="db-example-chip"
+                      onClick={() => handleVerify(claim)}
+                    >
+                      "{claim}"
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
           </>
         )}
+
+        {/* ── Loading state ── */}
+        {uiState === "loading" && (
+          <div className="db-process-area">
+            <ProgressStepper step={step} />
+            <Loader />
+          </div>
+        )}
+
+        {/* ── Results ── */}
+        {uiState === "results" && (
+          <div className="db-results">
+
+            {/* Results header */}
+            <div className="db-results-header">
+              <span className="db-results-label">
+                Analysis Results · {claims.length} claim{claims.length !== 1 ? "s" : ""} verified
+              </span>
+              <div className="db-results-actions">
+                <button className="db-btn-download" onClick={() => downloadPDF(claims)}>
+                  <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+                    <path d="M6.5 1v8M3.5 6.5l3 3 3-3M1 10.5h11" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                  Download Report
+                </button>
+                <button className="db-btn-reset" onClick={handleReset}>
+                  <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+                    <path d="M2 6.5a4.5 4.5 0 1 1 1.2 3M2 10V7h3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                  New Analysis
+                </button>
+              </div>
+            </div>
+
+            {/* Query echo */}
+            {inputText && (
+              <div style={{
+                padding: "0.75rem 1rem",
+                background: "rgba(255,255,255,0.025)",
+                border: "1px solid rgba(255,255,255,0.06)",
+                borderRadius: 10,
+                fontFamily: "'Inter', sans-serif",
+                fontSize: "0.85rem",
+                color: "rgba(255,255,255,0.45)",
+                lineHeight: 1.55,
+              }}>
+                <span style={{ color: "rgba(0,200,255,0.5)", fontSize: "0.65rem", letterSpacing: "0.1em", textTransform: "uppercase", marginRight: 8 }}>
+                  Analyzed
+                </span>
+                {inputText.length > 160 ? inputText.slice(0, 160) + "…" : inputText}
+              </div>
+            )}
+
+            {/* Topic warning */}
+            <TopicWarning topic={topic} warning={warning} />
+
+            {/* AI Detection */}
+            <AiDetectionBox probability={aiProbability} />
+
+            {/* Stats */}
+            <SummaryStats stats={stats} />
+
+            {/* Analytics charts */}
+            <AnalyticsPanel data={claims} />
+
+            {/* Claims list */}
+            <ClaimsList claims={claims} />
+
+          </div>
+        )}
+
+        </div>{/* end flex-1 main content */}
+
+        <div className="db-above">
+          <Footer />
+        </div>
       </div>
-
-      <Footer />
-    </div>
-  );
+    </>
+  )
 }
-

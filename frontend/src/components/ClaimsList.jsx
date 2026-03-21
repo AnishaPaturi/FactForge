@@ -1,17 +1,3 @@
-// import ClaimCard from "./ClaimCard";
-
-// export default function ClaimsList({ claims }) {
-//   return (
-//     <div>
-//       {claims.map((c, index) => (
-//         <ClaimCard key={index} claim={c} />
-//       ))}
-//     </div>
-//   );
-// }
-
-
-
 
 import ClaimCard from "./ClaimCard";
 

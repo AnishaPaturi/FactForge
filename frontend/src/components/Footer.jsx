@@ -1,11 +1,3 @@
-// // export default function Footer() {
-// //   return (
-// //     <div className="footer">
-// //       © 2026 FactForge — Hackathon Project
-// //     </div>
-// //   );
-// // }
-
 
 const styles = `
   .ff-footer {
