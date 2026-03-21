@@ -85,17 +85,11 @@ export default function Dashboard() {
             confidence: c.confidence,
             explanation: c.explanation,
 
-            // 🔥 KEEP STANCE
-            sources:
-              c.sources?.map((s) => ({
-                label: s.label,
-                url: s.url,
-                score: s.score,
-                stance: s.stance, // ✅ FIX
-              })) || [],
+            // ✅ DO NOT TRANSFORM SOURCES
+            sources: c.sources || [],
 
-            // 🔥 KEEP AGREEMENT DATA
-            source_analysis: c.source_analysis, // ✅ FIX
+            // ✅ PASS AGREEMENT DIRECTLY
+            source_analysis: c.source_analysis || null,
           })) || [],
       };
 
