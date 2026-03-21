@@ -164,6 +164,46 @@ backend/
 
 ---
 
+## 🎨 Frontend (React UI)
+
+The frontend is built using **React + Tailwind CSS**, designed with a clean, modern UI inspired by ChatGPT and Notion.
+
+It provides an interactive interface to:
+- Input text for fact-checking
+- View verification results with explanations
+- Browse past history
+
+---
+
+### 📁 Frontend Structure
+
+```text
+frontend/
+│
+├── src/
+│   ├── components/
+│   │   ├── InputBox.jsx
+│   │   ├── Loader.jsx
+│   │   ├── Navbar.jsx
+│   │   └── ResultCard.jsx
+│   │
+│   ├── pages/
+│   │   ├── Dashboard.jsx
+│   │   ├── History.jsx
+│   │   └── Login.jsx
+│   │
+│   ├── App.jsx
+│   ├── index.css
+│   └── main.jsx
+│
+├── index.html
+├── package.json
+├── tailwind.config.js
+├── postcss.config.js
+└── vite.config.js
+
+---
+
 ## ⚡ Installation & Setup
 
 ### 1️⃣ Clone the Repository
