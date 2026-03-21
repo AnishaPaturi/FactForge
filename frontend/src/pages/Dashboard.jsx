@@ -168,7 +168,7 @@ export default function Dashboard() {
                 confidence={claim.confidence}
                 explanation={claim.explanation}
                 sources={claim.sources}
-                source_analysis={claim.source_analysis}   // 🔥 THIS FIXES EVERYTHING
+                source_analysis={claim.source_analysis}   // 🔥 THIS LINE FIXES EVERYTHING
               />
             ))}
           </div>
