@@ -87,8 +87,9 @@ export default function Dashboard() {
             explanation: c.explanation,
             sources:
               c.sources?.map((s) => ({
-                label: s.title,
+                label: s.label,
                 url: s.url,
+                score: s.score,
               })) || [],
           })) || [],
       };

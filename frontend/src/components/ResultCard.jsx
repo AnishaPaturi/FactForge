@@ -159,7 +159,7 @@ export default function ResultCard({ index = 0, claim, verdict, confidence, expl
 
                   {/* RIGHT: score */}
                   <span className="text-xs font-mono px-2 py-0.5 rounded bg-indigo-500 text-white">
-                    {src.score}
+                    {src.score || "N/A"}
                   </span>
                 </a>
               ))}

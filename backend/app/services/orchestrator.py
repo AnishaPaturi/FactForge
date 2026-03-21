@@ -37,6 +37,7 @@ def run_pipeline(text: str):
                 {
                     "label": src.get("label") or urlparse(src["url"]).netloc.replace("www.", ""),
                     "url": src["url"],
+                    "snippet": src.get("snippet", ""),
                     "score": src.get("score", 0)
                 }
                 for src in evidence
