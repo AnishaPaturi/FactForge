@@ -86,11 +86,11 @@ export default function Dashboard() {
             explanation: c.explanation,
 
             // ✅ DO NOT TRANSFORM SOURCES
-            sources: c.sources || [],
+            sources: c.sources ??  [],
 
             // ✅ PASS AGREEMENT DIRECTLY
-            source_analysis: c.source_analysis || null,
-          })) || [],
+            source_analysis: c.source_analysis ?? null,
+          })) ?? [],
       };
 
       setResults(formatted);
