@@ -35,12 +35,16 @@ def run_pipeline(text: str):
         cleaned_stances = []
 
         for i in range(len(evidence)):
-            snippet = evidence[i].get("snippet", "").lower()
+            content = (
+                evidence[i].get("snippet") 
+                or evidence[i].get("content") 
+                or ""
+            ).lower()
 
             # 🔥 KEYWORD-BASED OVERRIDE (SMART FIX)
-            if any(word in snippet for word in ["myth", "not true", "false", "untrue", "incorrect"]):
+            if any(word in content for word in ["myth", "not true", "false", "untrue", "incorrect", "no evidence", "never"]):
                 val = "Disagree"
-            elif any(word in snippet for word in ["true", "correct", "confirmed"]):
+            elif any(word in content for word in ["true", "correct", "confirmed", "proven", "yes"]):
                 val = "Agree"
             else:
                 # fallback to LLM output
