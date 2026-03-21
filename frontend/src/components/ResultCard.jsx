@@ -39,7 +39,7 @@ export default function ResultCard({
           <p className="text-sm mb-3">{explanation}</p>
 
           {/* 🔥 AGREEMENT (ALWAYS SAFE RENDER) */}
-          {source_analysis ? (
+          {source_analysis && source_analysis.agreement_score !== undefined ? (
             <div className="mb-4">
               <p className="text-xs font-semibold mb-1">
                 Source Agreement ({agreementScore}%)

@@ -85,8 +85,11 @@ def run_pipeline(text: str):
         stances = cleaned_stances
 
         # 🔥 AGREEMENT SCORE
-        agreement_data = compute_agreement_score(stances, evidence)
-
+        agreement_data = compute_agreement_score(stances, evidence) or {
+            "counts": {"agree": 0, "disagree": 0, "neutral": 0},
+            "agreement_score": 0,
+            "insight": "No agreement data available"
+        }
         # 🔥 FORMAT SOURCES
         formatted_sources = []
         for i, src in enumerate(evidence):
@@ -113,5 +116,6 @@ def run_pipeline(text: str):
     }
 
     save_result(text, final_output)
+    print("FINAL OUTPUT:", final_output)
 
     return final_output
