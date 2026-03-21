@@ -4,6 +4,7 @@ import InputBox from "../components/InputBox";
 import ResultCard from "../components/ResultCard";
 import Loader from "../components/Loader";
 import { analyzeText } from "../services/api";
+import { downloadPDF } from "../services/api";
 
 // ─── AI Detection Box ─────────────────────────────────────────────
 function AiDetectionBox({ probability }) {
@@ -123,13 +124,22 @@ export default function Dashboard() {
           </div>
 
           {uiState === "results" && (
+          <div className="flex gap-3">
+            <button
+              onClick={() => downloadPDF(results)}
+              className="bg-green-600 text-white px-4 py-1 rounded hover:bg-green-700"
+            >
+              Download Report
+            </button>
+
             <button
               onClick={handleReset}
               className="text-sm text-gray-300 border px-3 py-1 rounded"
             >
               New Analysis
             </button>
-          )}
+          </div>
+        )}
         </div>
 
         {/* Input */}
