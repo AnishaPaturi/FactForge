@@ -1,5 +1,7 @@
 import requests
+from datetime import datetime
 from app.core.config import TAVILY_API_KEY
+from app.services.credibility_service import CredibilityService
 
 def search_claim(claim: str):
     api_url = "https://api.tavily.com/search"
@@ -22,17 +24,30 @@ def search_claim(claim: str):
         for r in data.get("results", []):
             link = r.get("url", "")
 
-            # 🚫 filter bad sources
             if any(domain in link for domain in bad_domains):
                 continue
+
+            published_date = None  # Tavily doesn't provide it
+
+            score = CredibilityService.score_source(
+                url=link,
+                published_date=published_date,
+                claim=claim,
+                sources=data.get("results", [])
+            )
 
             results.append({
                 "title": r.get("title"),
                 "url": link,
                 "snippet": r.get("content"),
+                "score": score
             })
 
-        return results[:3]  # top 3 clean results
+       
+        results.sort(key=lambda x: x["score"], reverse=True)
 
-    except:
+        return results[:3]
+
+    except Exception as e:
+        print("Search error:", e)
         return []

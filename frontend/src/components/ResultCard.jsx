@@ -67,18 +67,23 @@ const ChevronIcon = ({ open }) => (
     <path d="M4 6l4 4 4-4" stroke="#64748b" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
   </svg>
 )
-
+const getScoreColor = (score) => {
+  if (score >= 8) return "bg-emerald-500/10 text-emerald-400 border-emerald-500/30";
+  if (score >= 5) return "bg-amber-500/10 text-amber-400 border-amber-500/30";
+  return "bg-red-500/10 text-red-400 border-red-500/30";
+};
 // ─────────────────────────────────────────────────────────────────
 export default function ResultCard({ index = 0, claim, verdict, confidence, explanation, sources }) {
   const [expanded, setExpanded] = useState(true)
   const cfg = VERDICTS[verdict] || VERDICTS.unverifiable
   const VerdictIcon = cfg.Icon
-
+  console.log("SOURCES FRONTEND:", sources);
   return (
     <div
       className={`card card-hover overflow-hidden animate-slide-up ${cfg.borderClass}`}
       style={{ animationDelay: `${index * 80}ms`, animationFillMode: 'both' }}
     >
+      
       {/* Header row — always visible */}
       <button
         className="w-full text-left px-5 pt-4 pb-3 flex items-start gap-4"
@@ -107,6 +112,7 @@ export default function ResultCard({ index = 0, claim, verdict, confidence, expl
                   className={`h-full rounded-full transition-all duration-700 ${cfg.barClass}`}
                   style={{ width: `${confidence}%` }}
                 />
+                
               </div>
               <span className="text-xs font-mono text-slate-400 shrink-0">{confidence}%</span>
             </div>
@@ -128,30 +134,38 @@ export default function ResultCard({ index = 0, claim, verdict, confidence, expl
             </p>
             <p className="text-sm text-slate-400 leading-relaxed">{explanation}</p>
           </div>
+          
 
           {/* Sources */}
           {sources && sources.length > 0 && (
-            <div>
-              <p className="text-xs font-semibold text-slate-500 uppercase tracking-widest mb-2">
-                Sources
-              </p>
-              <div className="flex flex-wrap gap-2">
-                {sources.map((src, i) => (
-                  <a
-                    key={i}
-                    href={src.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    onClick={(e) => e.stopPropagation()}
-                    className="flex items-center gap-1.5 px-3 py-1.5 text-xs text-slate-400 hover:text-indigo-400 bg-surface-700 hover:bg-indigo-500/10 border border-white/[0.07] hover:border-indigo-500/30 rounded-lg transition-all duration-200"
-                  >
-                    <ExternalLinkIcon />
-                    {src.label}
-                  </a>
-                ))}
-              </div>
+          <div>
+            <p className="text-xs font-semibold text-slate-500 uppercase tracking-widest mb-2">
+              Sources
+            </p>
+
+            <div className="flex flex-col gap-2">
+              {sources.map((src, i) => (
+                <a
+                  key={i}
+                  href={src.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-between px-3 py-2 text-sm bg-surface-700 border border-white/[0.07] rounded-lg hover:bg-surface-600 transition"
+                >
+                  {/* LEFT: label */}
+                  <span className="text-slate-300">
+                    {src.label || "unknown"}
+                  </span>
+
+                  {/* RIGHT: score */}
+                  <span className="text-xs font-mono px-2 py-0.5 rounded bg-indigo-500 text-white">
+                    {src.score}
+                  </span>
+                </a>
+              ))}
             </div>
-          )}
+          </div>
+        )}
         </div>
       )}
     </div>

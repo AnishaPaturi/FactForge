@@ -3,6 +3,8 @@ from app.services.search_service import search_claim
 from app.services.verifier import verify_claim
 from app.services.ai_detector import detect_ai
 from app.services.db_service import save_result
+from urllib.parse import urlparse
+
 
 def run_pipeline(text: str):
     ai_score = detect_ai(text)
@@ -31,13 +33,20 @@ def run_pipeline(text: str):
             "verdict": verification["verdict"],
             "confidence": verification["confidence"],
             "explanation": verification["explanation"],
-            "sources": evidence
+            "sources": [
+                {
+                    "label": src.get("label") or urlparse(src["url"]).netloc.replace("www.", ""),
+                    "url": src["url"],
+                    "score": src.get("score", 0)
+                }
+                for src in evidence
+            ]
         })
 
     final_output = {
-            "ai_detection": ai_score,
-            "claims": results
-        }
+        "ai_detection": ai_score,
+        "claims": results
+    }
 
     save_result(text, final_output)
 
