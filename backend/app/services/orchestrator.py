@@ -1,5 +1,8 @@
 from app.services.claim_extractor import extract_claims
 from app.services.search_service import search_claim
+from app.services.topic_detector import detect_topic
+from app.services.bias_indicator import generate_warning
+
 from app.services.verifier import (
     verify_claim,
     classify_source_stance,
@@ -11,7 +14,12 @@ from urllib.parse import urlparse
 
 
 def run_pipeline(text: str):
+    # 🔥 AI DETECTION
     ai_score = detect_ai(text)
+
+    # 🔥 NEW: TOPIC DETECTION + WARNING
+    topic = detect_topic(text)
+    warning = generate_warning(topic)
 
     claims = extract_claims(text)
     results = []
@@ -51,7 +59,7 @@ def run_pipeline(text: str):
 
         cleaned_stances = []
 
-        # 🔥 MAIN LOOP (FINAL VERSION)
+        # 🔥 MAIN LOOP
         for i in range(len(evidence)):
             content = " ".join([
                 evidence[i].get("title", ""),
@@ -73,7 +81,7 @@ def run_pipeline(text: str):
                 if val not in ["Agree", "Disagree", "Neutral"]:
                     val = "Neutral"
 
-            # 🔥🔥🔥 RULE 3: VERDICT ALIGNMENT (CRITICAL FIX)
+            # ✅ RULE 3: VERDICT ALIGNMENT
             if val == "Neutral":
                 if verdict == "False":
                     val = "Disagree"
@@ -90,6 +98,7 @@ def run_pipeline(text: str):
             "agreement_score": 0,
             "insight": "No agreement data available"
         }
+
         # 🔥 FORMAT SOURCES
         formatted_sources = []
         for i, src in enumerate(evidence):
@@ -110,8 +119,11 @@ def run_pipeline(text: str):
             "sources": formatted_sources
         })
 
+    # 🔥 FINAL OUTPUT (UPDATED)
     final_output = {
         "ai_detection": ai_score,
+        "topic": topic,          # ✅ NEW
+        "warning": warning,      # ✅ NEW
         "claims": results
     }
 
