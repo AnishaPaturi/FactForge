@@ -674,6 +674,7 @@
 
 
 
+
 import { useState } from "react";
 import Navbar from "../components/Navbar";
 import InputBox from "../components/InputBox";
@@ -734,7 +735,26 @@ function AiDetectionBox({ probability }) {
   );
 }
 
-/* Verdict normalizer */
+/* Topic Warning */
+function TopicWarning({ topic, warning }) {
+  if (!warning || warning.level === "none") return null;
+
+  const styles = {
+    high: "bg-red-500/10 border-red-500/40 text-red-300",
+    medium: "bg-yellow-500/10 border-yellow-500/40 text-yellow-300",
+    low: "bg-blue-500/10 border-blue-500/40 text-blue-300",
+  };
+
+  return (
+    <div className={`card border p-5 rounded-xl ${styles[warning.level]}`}>
+      <p className="text-xs uppercase text-gray-400">Detected Topic</p>
+      <h2 className="text-xl font-bold capitalize">{topic}</h2>
+      <p className="mt-2 text-sm">{warning.message}</p>
+    </div>
+  );
+}
+
+/* Verdict mapping */
 const mapVerdict = (v = "") => {
   if (v === "True") return "true";
   if (v === "False") return "false";
@@ -747,6 +767,8 @@ export default function Dashboard() {
   const [step, setStep] = useState(0);
   const [uiState, setUiState] = useState("empty");
   const [aiProbability, setAiProbability] = useState(0);
+  const [topic, setTopic] = useState("general");
+  const [warning, setWarning] = useState(null);
 
   const handleVerify = async (input) => {
     if (!input?.trim()) return;
@@ -775,6 +797,9 @@ export default function Dashboard() {
 
         setClaims(normalized);
         setAiProbability(data?.ai_detection?.ai_probability || 0);
+        setTopic(data?.topic || "general");
+        setWarning(data?.warning || null);
+
         addSession(input.trim(), data.claims);
         setUiState("results");
       } else {
@@ -786,12 +811,6 @@ export default function Dashboard() {
       setClaims([]);
       setUiState("empty");
     }
-  };
-
-  const handleReset = () => {
-    setUiState("empty");
-    setClaims([]);
-    setStep(0);
   };
 
   const stats = {
@@ -813,49 +832,13 @@ export default function Dashboard() {
       <Navbar />
 
       <div className="container">
-        <div className="flex justify-between items-start">
-          <div>
-            <h1 className="text-xl font-bold text-white">Fact Analyzer</h1>
-            <p className="text-sm text-gray-400">
-              Enter text and verify claims instantly
-            </p>
-          </div>
-
-          {uiState === "results" && (
-            <div className="flex gap-3">
-              <button
-                onClick={() => downloadPDF(claims)}
-                className="bg-green-600 text-white px-4 py-1 rounded"
-              >
-                Download Report
-              </button>
-
-              <button
-                onClick={handleReset}
-                className="border px-3 py-1 rounded text-sm"
-              >
-                New Analysis
-              </button>
-            </div>
-          )}
-        </div>
-
         <InputBox onVerify={handleVerify} />
-
-        {step > 0 && uiState !== "empty" && (
-          <ProgressStepper step={step} />
-        )}
 
         {uiState === "loading" && <Loader />}
 
-        {uiState === "empty" && (
-          <div className="text-center py-10 text-gray-400">
-            Enter text above to start verifying claims
-          </div>
-        )}
-
-        {uiState === "results" && claims.length > 0 && (
+        {uiState === "results" && (
           <>
+            <TopicWarning topic={topic} warning={warning} />
             <AiDetectionBox probability={aiProbability} />
             <SummaryStats stats={stats} />
             <AnalyticsPanel data={claims} />
