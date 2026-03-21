@@ -32,16 +32,25 @@ def run_pipeline(text: str):
         # 🔥 STEP 1: GET STANCES
         raw_stances = classify_source_stance(claim, evidence)
 
-        # 🔥 STEP 2: CLEAN + FIX STANCES (CRITICAL)
         cleaned_stances = []
-        for i in range(len(evidence)):
-            if raw_stances and i < len(raw_stances):
-                val = str(raw_stances[i]).strip().capitalize()
 
-                if val not in ["Agree", "Disagree", "Neutral"]:
-                    val = "Neutral"
+        for i in range(len(evidence)):
+            snippet = evidence[i].get("snippet", "").lower()
+
+            # 🔥 KEYWORD-BASED OVERRIDE (SMART FIX)
+            if any(word in snippet for word in ["myth", "not true", "false", "untrue", "incorrect"]):
+                val = "Disagree"
+            elif any(word in snippet for word in ["true", "correct", "confirmed"]):
+                val = "Agree"
             else:
-                val = "Neutral"
+                # fallback to LLM output
+                if raw_stances and i < len(raw_stances):
+                    val = str(raw_stances[i]).strip().capitalize()
+
+                    if val not in ["Agree", "Disagree", "Neutral"]:
+                        val = "Neutral"
+                else:
+                    val = "Neutral"
 
             cleaned_stances.append(val)
 
