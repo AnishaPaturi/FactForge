@@ -3,10 +3,9 @@ import Navbar from "../components/Navbar";
 import InputBox from "../components/InputBox";
 import ResultCard from "../components/ResultCard";
 import Loader from "../components/Loader";
-import { analyzeText } from "../services/api";
-import { downloadPDF } from "../services/api";
+import { analyzeText, downloadPDF } from "../services/api";
 
-// ─── AI Detection Box ─────────────────────────────────────────────
+// AI Detection Box
 function AiDetectionBox({ probability }) {
   const pct = probability || 0;
   const level = pct >= 70 ? "high" : pct >= 40 ? "medium" : "low";
@@ -54,7 +53,7 @@ function AiDetectionBox({ probability }) {
   );
 }
 
-// ─── VERDICT MAPPING FIX (IMPORTANT) ─────────────────────────────
+// Verdict mapping
 const mapVerdict = (v) => {
   if (v === "True") return "true";
   if (v === "False") return "false";
@@ -62,7 +61,6 @@ const mapVerdict = (v) => {
   return "unverifiable";
 };
 
-// ─── MAIN DASHBOARD ───────────────────────────────────────────────
 export default function Dashboard() {
   const [uiState, setUiState] = useState("empty");
   const [results, setResults] = useState(null);
@@ -76,7 +74,7 @@ export default function Dashboard() {
     try {
       const data = await analyzeText(text);
 
-      // 🔥 transform backend → frontend format
+      // 🔥 FIXED TRANSFORMATION (IMPORTANT)
       const formatted = {
         aiProbability: data?.ai_detection?.ai_probability || 0,
         claims:
@@ -86,12 +84,18 @@ export default function Dashboard() {
             verdict: mapVerdict(c.verdict),
             confidence: c.confidence,
             explanation: c.explanation,
+
+            // 🔥 KEEP STANCE
             sources:
               c.sources?.map((s) => ({
                 label: s.label,
                 url: s.url,
                 score: s.score,
+                stance: s.stance, // ✅ FIX
               })) || [],
+
+            // 🔥 KEEP AGREEMENT DATA
+            source_analysis: c.source_analysis, // ✅ FIX
           })) || [],
       };
 
@@ -114,7 +118,6 @@ export default function Dashboard() {
       <Navbar />
 
       <main className="max-w-3xl mx-auto p-6 space-y-5">
-        {/* Header */}
         <div className="flex justify-between">
           <div>
             <h1 className="text-2xl font-bold">Fact Analyzer</h1>
@@ -124,28 +127,26 @@ export default function Dashboard() {
           </div>
 
           {uiState === "results" && (
-          <div className="flex gap-3">
-            <button
-              onClick={() => downloadPDF(results)}
-              className="bg-green-600 text-white px-4 py-1 rounded hover:bg-green-700"
-            >
-              Download Report
-            </button>
+            <div className="flex gap-3">
+              <button
+                onClick={() => downloadPDF(results)}
+                className="bg-green-600 text-white px-4 py-1 rounded"
+              >
+                Download Report
+              </button>
 
-            <button
-              onClick={handleReset}
-              className="text-sm text-gray-300 border px-3 py-1 rounded"
-            >
-              New Analysis
-            </button>
-          </div>
-        )}
+              <button
+                onClick={handleReset}
+                className="text-sm border px-3 py-1 rounded"
+              >
+                New Analysis
+              </button>
+            </div>
+          )}
         </div>
 
-        {/* Input */}
         <InputBox onAnalyze={handleAnalyze} isLoading={uiState === "loading"} />
 
-        {/* STATES */}
         {uiState === "loading" && <Loader />}
 
         {uiState === "empty" && (
@@ -154,7 +155,6 @@ export default function Dashboard() {
           </div>
         )}
 
-        {/* RESULTS */}
         {uiState === "results" && results && (
           <div className="space-y-4">
             <AiDetectionBox probability={results.aiProbability} />
@@ -164,11 +164,11 @@ export default function Dashboard() {
                 key={claim.id}
                 index={i}
                 claim={claim.claim}
-                verdict={claim.verdict?.toLowerCase()}
+                verdict={claim.verdict}
                 confidence={claim.confidence}
                 explanation={claim.explanation}
                 sources={claim.sources}
-                source_analysis={claim.source_analysis}   // 🔥 THIS LINE FIXES EVERYTHING
+                source_analysis={claim.source_analysis}
               />
             ))}
           </div>
