@@ -8,14 +8,26 @@ const API = axios.create({
 
 // ✅ LOGIN
 export const loginUser = async (data) => {
-  try {
-    const res = await API.post("/api/login", data); // fixed slash
-    return res.data;
-  } catch (err) {
-    console.error("Login Error:", err.response?.data || err.message);
-    throw err;
+  const routes = [
+    "/api/login",
+    "/login",
+    "/login",
+    "/auth/login"
+  ];
+
+  for (let route of routes) {
+    try {
+      console.log("Trying route:", route);
+      const res = await API.post(route, data);
+      return res.data;
+    } catch (err) {
+      console.warn("Failed route:", route);
+    }
   }
+
+  throw new Error("All login routes failed");
 };
+
 
 // ✅ SIGNUP (ROBUST VERSION)
 export const registerUser = async (data) => {

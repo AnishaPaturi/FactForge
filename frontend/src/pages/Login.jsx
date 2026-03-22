@@ -412,7 +412,10 @@ export default function Login() {
     setLoading(true);
 
     try {
-      await loginUser(email, password);
+      await loginUser({
+        email,
+        password,
+      });
       navigate("/dashboard");
     } catch (error) {
       console.error("Login error:", error);
