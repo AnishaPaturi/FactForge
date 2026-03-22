@@ -4,7 +4,7 @@ import uuid
 from datetime import datetime
 from app.db import Base
 
-Base = declarative_base()
+
 
 class AnalysisResult(Base):
     __tablename__ = "analysis_results"
