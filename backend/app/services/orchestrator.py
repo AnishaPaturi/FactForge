@@ -15,10 +15,7 @@ from app.services.db_service import save_result
 from app.core.config import OPENROUTER_API_KEY, OPENROUTER_BASE_URL, MODEL_NAME
 from app.utils.helpers import safe_request
 
-from urllib.parse import urlparse
 
-
-# 🔥 CONFIDENCE LEVEL
 def get_confidence_level(score: int) -> str:
     if score >= 75:
         return "High"
@@ -27,7 +24,6 @@ def get_confidence_level(score: int) -> str:
     return "Low"
 
 
-# 🔥 BIAS DETECTION
 def detect_bias(text: str) -> str:
     prompt = f"""
     Classify the bias of this claim as:
@@ -60,7 +56,6 @@ def detect_bias(text: str) -> str:
         return "Neutral"
 
 
-# 🔥 BETTER EXPLANATION
 def generate_better_explanation(claim, verdict, evidence):
     context = "\n".join([
         f"- {src.get('snippet', '')}"
@@ -75,7 +70,7 @@ def generate_better_explanation(claim, verdict, evidence):
     {context}
 
     Explain clearly WHY the claim is {verdict}.
-    Keep it short (2-3 lines).
+    Keep it short.
     """
 
     response = safe_request(
@@ -100,10 +95,8 @@ def generate_better_explanation(claim, verdict, evidence):
 
 
 def run_pipeline(text: str):
-    # 🔥 AI DETECTION
     ai_score = detect_ai(text)
 
-    # 🔥 TOPIC + WARNING :contentReference[oaicite:0]{index=0}
     topic = detect_topic(text)
     warning = generate_warning(topic)
 
@@ -113,7 +106,7 @@ def run_pipeline(text: str):
     for claim in claims:
         claim = claim.strip().rstrip(".")
 
-        evidence = search_claim(claim) :contentReference[oaicite:2]{index=2}
+        evidence = search_claim(claim)
 
         if not evidence:
             results.append({
@@ -128,42 +121,20 @@ def run_pipeline(text: str):
             })
             continue
 
-        # 🔥 VERIFY
-        verification = verify_claim(claim, evidence) :contentReference[oaicite:3]{index=3}
+        verification = verify_claim(claim, evidence)
         verdict = verification["verdict"]
 
-        # 🔥 ADDITIONS
         confidence_level = get_confidence_level(verification["confidence"])
         bias = detect_bias(claim)
         explanation = generate_better_explanation(claim, verdict, evidence)
 
-        # 🔥 STANCES
         raw_stances = classify_source_stance(claim, evidence)
 
-        negative_keywords = [
-            "myth", "false", "not true", "incorrect",
-            "debunked", "no evidence", "misconception"
-        ]
-
-        positive_keywords = [
-            "true", "confirmed", "proven", "correct"
-        ]
-
         cleaned_stances = []
-
         for i in range(len(evidence)):
-            content = " ".join([
-                evidence[i].get("title", ""),
-                evidence[i].get("snippet", "")
-            ]).lower()
-
             val = "Neutral"
 
-            if any(k in content for k in negative_keywords):
-                val = "Disagree"
-            elif any(k in content for k in positive_keywords):
-                val = "Agree"
-            elif raw_stances and i < len(raw_stances):
+            if raw_stances and i < len(raw_stances):
                 val = str(raw_stances[i]).capitalize()
 
             if val == "Neutral":
@@ -174,20 +145,16 @@ def run_pipeline(text: str):
 
             cleaned_stances.append(val)
 
-        stances = cleaned_stances
+        agreement_data = compute_agreement_score(cleaned_stances, evidence)
 
-        # 🔥 AGREEMENT
-        agreement_data = compute_agreement_score(stances, evidence)
-
-        # 🔥 FORMAT SOURCES (with credibility already computed in search)
         formatted_sources = []
         for i, src in enumerate(evidence):
             formatted_sources.append({
                 "label": src.get("title"),
                 "url": src["url"],
                 "snippet": src.get("snippet", ""),
-                "credibility": src.get("score", 0),  # already computed :contentReference[oaicite:4]{index=4}
-                "stance": stances[i]
+                "credibility": src.get("score", 0),
+                "stance": cleaned_stances[i]
             })
 
         results.append({
