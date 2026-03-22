@@ -107,7 +107,7 @@ def run_pipeline(text: str):
     topic = detect_topic(text)
     warning = generate_warning(topic)
 
-    claims = extract_claims(text) :contentReference[oaicite:1]{index=1}
+    claims = extract_claims(text)
     results = []
 
     for claim in claims:
