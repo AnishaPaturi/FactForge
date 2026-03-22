@@ -1,3 +1,4 @@
+//comment
 import ResultCard from "./ResultCard";
 
 export default function ClaimsList({ claims = [] }) {
