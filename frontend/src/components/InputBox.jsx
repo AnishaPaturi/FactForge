@@ -95,6 +95,7 @@ const styles = `
 
 export default function InputBox({ onVerify }) {
   const [text, setText] = useState("");
+  const { t } = useTranslation();
 
   return (
     <>
@@ -103,7 +104,7 @@ export default function InputBox({ onVerify }) {
         <span className="ff-inputbox-label">Claim Input</span>
         <textarea
           rows="4"
-          placeholder="Paste text or URL to verify..."
+          placeholder={t("input_placeholder")}
           value={text}
           onChange={(e) => setText(e.target.value)}
         />
