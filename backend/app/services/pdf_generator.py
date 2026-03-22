@@ -6,6 +6,9 @@ from reportlab.lib.units import mm
 from io import BytesIO
 from datetime import datetime
 
+import pytz
+
+
 # ── Brand palette ──────────────────────────────────────────────
 PRIMARY     = colors.HexColor("#1E3A5F")   # deep navy
 ACCENT      = colors.HexColor("#2E86DE")   # bright blue
@@ -40,7 +43,9 @@ def _header_footer(canvas, doc):
 
 def generate_pdf(data):
     buffer = BytesIO()
-
+    ist = pytz.timezone("Asia/Kolkata")
+    current_time = datetime.now(pytz.utc).astimezone(ist)
+    
     doc = SimpleDocTemplate(
         buffer,
         pagesize=A4,
@@ -115,7 +120,7 @@ def generate_pdf(data):
     content.append(Spacer(1, 4*mm))
     content.append(Paragraph("FactForge Report", title_style))
     content.append(Paragraph(
-        f"Generated on {datetime.now().strftime('%B %d, %Y at %H:%M')}",
+        f"Generated on {current_time.strftime('%B %d, %Y at %H:%M')}",
         subtitle_style
     ))
     content.append(Spacer(1, 3*mm))

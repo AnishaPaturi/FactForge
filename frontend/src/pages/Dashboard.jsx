@@ -10,7 +10,7 @@ import AnalyticsPanel from "../components/AnalyticsPanel";
 import ClaimsList from "../components/ClaimsList";
 import Loader from "../components/Loader";
 import Footer from "../components/Footer";
-import { addSession } from "./historyStore.js";
+import { addSession } from "./historyStore";
 import { downloadPDF } from "../services/api";
 
 /* ─── Scoped styles ─────────────────────────────────────────────── */
@@ -579,39 +579,15 @@ function AiDetectionBox({ probability }) {
 
 /* ─── Topic Warning ─────────────────────────────────────────────── */
 function TopicWarning({ topic, warning }) {
-  if (!warning || warning.level === "none") return null;
-
-  const colors = {
-    high: "#f87171",
-    medium: "#fbbf24",
-    low: "#60a5fa",
-  };
-
+  if (!warning || warning.level === "none") return null
   return (
-    <div
-      style={{
-        padding: "1rem",
-        borderRadius: 14,
-        border: `1px solid ${colors[warning.level]}40`,
-        background: `${colors[warning.level]}10`,
-        marginBottom: "1rem",
-      }}
-    >
-      <p style={{ fontSize: 12, opacity: 0.7 }}>
-        ⚠️ HIGH-RISK CONTENT
-      </p>
-
-      <p style={{ fontWeight: 600, marginTop: 4 }}>
-        Topic: {topic}
-      </p>
-
-      <p style={{ fontSize: 13, marginTop: 4 }}>
-        {warning.message}
-      </p>
+    <div className={`db-topic-card ${warning.level}`}>
+      <p className="db-topic-tag">Detected Topic</p>
+      <p className="db-topic-name">{topic}</p>
+      <p className="db-topic-msg">{warning.message}</p>
     </div>
-  );
+  )
 }
-
 
 /* ─── Main Dashboard ────────────────────────────────────────────── */
 export default function Dashboard() {
@@ -776,7 +752,10 @@ export default function Dashboard() {
                 Analysis Results · {claims.length} claim{claims.length !== 1 ? "s" : ""} verified
               </span>
               <div className="db-results-actions">
-                <button className="db-btn-download" onClick={() => downloadPDF(claims)}>
+                <button className="db-btn-download" onClick={() => downloadPDF({
+                                                                    claims: claims,
+                                                                    aiProbability: aiProbability
+                                                                  })}>
                   <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
                     <path d="M6.5 1v8M3.5 6.5l3 3 3-3M1 10.5h11" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
                   </svg>
