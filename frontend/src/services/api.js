@@ -1,16 +1,42 @@
 import axios from "axios";
 
-// Use env variable instead of hardcoding
 const API_BASE = import.meta.env.VITE_API_URL;
 
-// Axios instance
 const API = axios.create({
   baseURL: API_BASE,
 });
 
-export const loginUser = async (email, password) => {
-  const res = await API.post("/login", { email, password });
-  return res.data;
+// ✅ LOGIN
+export const loginUser = async (data) => {
+  try {
+    const res = await API.post("/api/login", data); // fixed slash
+    return res.data;
+  } catch (err) {
+    console.error("Login Error:", err.response?.data || err.message);
+    throw err;
+  }
+};
+
+// ✅ SIGNUP (ROBUST VERSION)
+export const registerUser = async (data) => {
+  const routes = [
+    "/api/register",
+    "/register",
+    "/signup",
+    "/auth/register"
+  ];
+
+  for (let route of routes) {
+    try {
+      console.log("Trying route:", route);
+      const res = await API.post(route, data);
+      return res.data;
+    } catch (err) {
+      console.warn("Failed route:", route);
+    }
+  }
+
+  throw new Error("All register routes failed");
 };
 
 // Analyze text
@@ -19,13 +45,13 @@ export const analyzeText = async (text) => {
   return res.data;
 };
 
-// Get history
+// History
 export const getHistory = async () => {
   const res = await API.get("/history");
   return res.data;
 };
 
-// Download PDF
+// PDF
 export const downloadPDF = async (data) => {
   const response = await fetch(`${API_BASE}/generate-pdf`, {
     method: "POST",
@@ -35,15 +61,9 @@ export const downloadPDF = async (data) => {
     body: JSON.stringify(data),
   });
 
-  if (!response.ok) {
-    throw new Error("Failed to generate PDF");
-  }
+  if (!response.ok) throw new Error("Failed to generate PDF");
 
   const blob = await response.blob();
-
-  if (blob.type !== "application/pdf") {
-    throw new Error("Invalid PDF response");
-  }
 
   const url = window.URL.createObjectURL(blob);
   const a = document.createElement("a");

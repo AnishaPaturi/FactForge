@@ -486,6 +486,14 @@ export default function Login() {
               Continue with Demo
             </button>
 
+            {/* Signup */}
+            <button
+              className="ff-btn-secondary"
+              onClick={() => navigate("/signup")}
+            >
+              Create Account
+            </button>
+
             {/* Footer */}
             <p className="ff-footer">
               AI-powered fact verification · <span>FactForge</span>
