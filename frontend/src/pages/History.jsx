@@ -3,7 +3,7 @@
 import { useState, useMemo, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Navbar from '../components/Navbar'
-import { getSessions, deleteSession, clearHistory } from './historyStore.js'  // ← same folder
+import { getSessions, deleteSession, clearHistory } from './historyStore'  // ← same folder
 
 /* ─── Scoped styles ─────────────────────────────────────────────── */
 const styles = `
