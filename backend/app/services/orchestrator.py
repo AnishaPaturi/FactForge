@@ -8,80 +8,164 @@ from app.services.verifier import (
     classify_source_stance,
     compute_agreement_score,
 )
+
 from app.services.ai_detector import detect_ai
 from app.services.db_service import save_result
+
+from app.core.config import OPENROUTER_API_KEY, OPENROUTER_BASE_URL, MODEL_NAME
+from app.utils.helpers import safe_request
+
 from urllib.parse import urlparse
+
+
+# 🔥 CONFIDENCE LEVEL
+def get_confidence_level(score: int) -> str:
+    if score >= 75:
+        return "High"
+    elif score >= 40:
+        return "Medium"
+    return "Low"
+
+
+# 🔥 BIAS DETECTION
+def detect_bias(text: str) -> str:
+    prompt = f"""
+    Classify the bias of this claim as:
+    Left, Right, or Neutral.
+
+    Claim:
+    {text}
+
+    Return ONLY one word.
+    """
+
+    response = safe_request(
+        f"{OPENROUTER_BASE_URL}/chat/completions",
+        headers={
+            "Authorization": f"Bearer {OPENROUTER_API_KEY}",
+            "Content-Type": "application/json",
+        },
+        json_data={
+            "model": MODEL_NAME,
+            "messages": [{"role": "user", "content": prompt}],
+        },
+    )
+
+    if not response:
+        return "Neutral"
+
+    try:
+        return response["choices"][0]["message"]["content"].strip().capitalize()
+    except:
+        return "Neutral"
+
+
+# 🔥 BETTER EXPLANATION
+def generate_better_explanation(claim, verdict, evidence):
+    context = "\n".join([
+        f"- {src.get('snippet', '')}"
+        for src in evidence[:3]
+    ])
+
+    prompt = f"""
+    Claim: {claim}
+    Verdict: {verdict}
+
+    Evidence:
+    {context}
+
+    Explain clearly WHY the claim is {verdict}.
+    Keep it short (2-3 lines).
+    """
+
+    response = safe_request(
+        f"{OPENROUTER_BASE_URL}/chat/completions",
+        headers={
+            "Authorization": f"Bearer {OPENROUTER_API_KEY}",
+            "Content-Type": "application/json",
+        },
+        json_data={
+            "model": MODEL_NAME,
+            "messages": [{"role": "user", "content": prompt}],
+        },
+    )
+
+    if not response:
+        return "Explanation unavailable"
+
+    try:
+        return response["choices"][0]["message"]["content"].strip()
+    except:
+        return "Explanation unavailable"
 
 
 def run_pipeline(text: str):
     # 🔥 AI DETECTION
     ai_score = detect_ai(text)
 
-    # 🔥 NEW: TOPIC DETECTION + WARNING
+    # 🔥 TOPIC + WARNING :contentReference[oaicite:0]{index=0}
     topic = detect_topic(text)
     warning = generate_warning(topic)
 
-    claims = extract_claims(text)
+    claims = extract_claims(text) :contentReference[oaicite:1]{index=1}
     results = []
 
     for claim in claims:
         claim = claim.strip().rstrip(".")
-        evidence = search_claim(claim)
+
+        evidence = search_claim(claim) :contentReference[oaicite:2]{index=2}
 
         if not evidence:
             results.append({
                 "claim": claim,
                 "verdict": "Unverifiable",
                 "confidence": 0,
+                "confidence_level": "Low",
+                "bias": "Neutral",
                 "explanation": "No evidence found",
                 "sources": [],
                 "source_analysis": None
             })
             continue
 
-        # 🔥 VERIFY CLAIM
-        verification = verify_claim(claim, evidence)
+        # 🔥 VERIFY
+        verification = verify_claim(claim, evidence) :contentReference[oaicite:3]{index=3}
         verdict = verification["verdict"]
 
-        # 🔥 GET RAW STANCES (LLM)
+        # 🔥 ADDITIONS
+        confidence_level = get_confidence_level(verification["confidence"])
+        bias = detect_bias(claim)
+        explanation = generate_better_explanation(claim, verdict, evidence)
+
+        # 🔥 STANCES
         raw_stances = classify_source_stance(claim, evidence)
 
-        # 🔥 KEYWORDS
         negative_keywords = [
-            "myth", "false", "not visible", "cannot be seen",
-            "not true", "incorrect", "no evidence", "debunked",
-            "misconception", "not possible", "never"
+            "myth", "false", "not true", "incorrect",
+            "debunked", "no evidence", "misconception"
         ]
 
         positive_keywords = [
-            "true", "correct", "confirmed", "proven", "visible", "yes"
+            "true", "confirmed", "proven", "correct"
         ]
 
         cleaned_stances = []
 
-        # 🔥 MAIN LOOP
         for i in range(len(evidence)):
             content = " ".join([
                 evidence[i].get("title", ""),
-                evidence[i].get("snippet", ""),
-                evidence[i].get("content", "")
+                evidence[i].get("snippet", "")
             ]).lower()
 
             val = "Neutral"
 
-            # ✅ RULE 1: KEYWORD OVERRIDE
             if any(k in content for k in negative_keywords):
                 val = "Disagree"
             elif any(k in content for k in positive_keywords):
                 val = "Agree"
-
-            # ✅ RULE 2: LLM FALLBACK
             elif raw_stances and i < len(raw_stances):
-                val = str(raw_stances[i]).strip().capitalize()
-                if val not in ["Agree", "Disagree", "Neutral"]:
-                    val = "Neutral"
+                val = str(raw_stances[i]).capitalize()
 
-            # ✅ RULE 3: VERDICT ALIGNMENT
             if val == "Neutral":
                 if verdict == "False":
                     val = "Disagree"
@@ -92,42 +176,38 @@ def run_pipeline(text: str):
 
         stances = cleaned_stances
 
-        # 🔥 AGREEMENT SCORE
-        agreement_data = compute_agreement_score(stances, evidence) or {
-            "counts": {"agree": 0, "disagree": 0, "neutral": 0},
-            "agreement_score": 0,
-            "insight": "No agreement data available"
-        }
+        # 🔥 AGREEMENT
+        agreement_data = compute_agreement_score(stances, evidence)
 
-        # 🔥 FORMAT SOURCES
+        # 🔥 FORMAT SOURCES (with credibility already computed in search)
         formatted_sources = []
         for i, src in enumerate(evidence):
             formatted_sources.append({
-                "label": src.get("label") or urlparse(src["url"]).netloc.replace("www.", ""),
+                "label": src.get("title"),
                 "url": src["url"],
                 "snippet": src.get("snippet", ""),
-                "score": src.get("score", 0),
+                "credibility": src.get("score", 0),  # already computed :contentReference[oaicite:4]{index=4}
                 "stance": stances[i]
             })
 
         results.append({
             "claim": claim,
-            "verdict": verification["verdict"],
+            "verdict": verdict,
             "confidence": verification["confidence"],
-            "explanation": verification["explanation"],
+            "confidence_level": confidence_level,
+            "bias": bias,
+            "explanation": explanation,
             "source_analysis": agreement_data,
             "sources": formatted_sources
         })
 
-    # 🔥 FINAL OUTPUT (UPDATED)
     final_output = {
         "ai_detection": ai_score,
-        "topic": topic,          # ✅ NEW
-        "warning": warning,      # ✅ NEW
+        "topic": topic,
+        "warning": warning,
         "claims": results
     }
 
     save_result(text, final_output)
-    # print("FINAL OUTPUT:", final_output)
 
     return final_output
