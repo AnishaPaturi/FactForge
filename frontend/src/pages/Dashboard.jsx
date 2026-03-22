@@ -10,7 +10,7 @@ import AnalyticsPanel from "../components/AnalyticsPanel";
 import ClaimsList from "../components/ClaimsList";
 import Loader from "../components/Loader";
 import Footer from "../components/Footer";
-import { addSession } from "./historyStore";
+import { addSession } from "./historyStore.js";
 import { downloadPDF } from "../services/api";
 
 /* ─── Scoped styles ─────────────────────────────────────────────── */
