@@ -1,6 +1,6 @@
 
 import ConfidenceChart from "./ConfidenceChart";
-import ResultBreakdownChart from "./ResultBreakdownChart";
+import ResultBreakdownChart from "./ResultBreakDownChart";
 
 const styles = `
   .ff-analytics-grid {
