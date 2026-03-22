@@ -221,7 +221,6 @@
 
 
 import { useNavigate, useLocation } from 'react-router-dom'
-import i18n from "i18next"
 
 const styles = `
   @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@600;700&family=Inter:wght@300;400;500;600&display=swap');
@@ -400,6 +399,12 @@ export default function Navbar() {
             className={`ff-nav-link${isActive('/dashboard') ? ' active' : ''}`}
             onClick={() => navigate('/dashboard')}
           >
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+              <rect x="1" y="1" width="5" height="5" rx="1.2" stroke="currentColor" strokeWidth="1.3"/>
+              <rect x="8" y="1" width="5" height="5" rx="1.2" stroke="currentColor" strokeWidth="1.3"/>
+              <rect x="1" y="8" width="5" height="5" rx="1.2" stroke="currentColor" strokeWidth="1.3"/>
+              <rect x="8" y="8" width="5" height="5" rx="1.2" stroke="currentColor" strokeWidth="1.3"/>
+            </svg>
             Dashboard
           </button>
 
@@ -407,39 +412,26 @@ export default function Navbar() {
             className={`ff-nav-link${isActive('/history') ? ' active' : ''}`}
             onClick={() => navigate('/history')}
           >
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+              <circle cx="7" cy="7" r="5.5" stroke="currentColor" strokeWidth="1.3"/>
+              <path d="M7 4.5v2.8l2 1.2" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round"/>
+            </svg>
             History
           </button>
         </nav>
 
         {/* Right side */}
         <div className="ff-navbar-right">
-
-          {/* 🔥 LANGUAGE SWITCHER */}
-          <select
-            onChange={(e) => i18n.changeLanguage(e.target.value)}
-            style={{
-              padding: "6px 10px",
-              borderRadius: "8px",
-              background: "rgba(255,255,255,0.05)",
-              color: "white",
-              border: "1px solid rgba(255,255,255,0.2)",
-              cursor: "pointer"
-            }}
-          >
-            <option value="en">EN</option>
-            <option value="hi">HI</option>
-            <option value="te">TE</option>
-          </select>
-
           <div className="ff-navbar-dot" />
-
           <button
             className="ff-navbar-signout"
             onClick={() => navigate('/login')}
           >
+            <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+              <path d="M5 2H2.5A1.5 1.5 0 0 0 1 3.5v6A1.5 1.5 0 0 0 2.5 11H5M8.5 9.5L12 6.5l-3.5-3M12 6.5H5" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
             Sign out
           </button>
-
         </div>
 
       </div>
