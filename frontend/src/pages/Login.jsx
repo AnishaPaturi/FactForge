@@ -1,6 +1,8 @@
 
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { loginUser } from "../services/api";
+
 
 /* ─── Inline global styles ─────────────────────────────────── */
 const globalStyles = `
@@ -406,25 +408,19 @@ export default function Login() {
 
   // ─── REAL LOGIN ─────────────────────────────────────────────
   const handleLogin = async () => {
-    if (!canSubmit) return
-    setLoading(true)
+    if (!canSubmit) return;
+    setLoading(true);
+
     try {
-      const res = await fetch("http://localhost:8000/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password })
-      })
-      if (res.ok) {
-        navigate("/dashboard")
-      } else {
-        alert("Invalid email or password")
-      }
+      await loginUser(email, password);
+      navigate("/dashboard");
     } catch (error) {
-      console.error("Login error:", error)
-      alert("Server error")
+      console.error("Login error:", error);
+      alert("Invalid email or password");
     }
-    setLoading(false)
-  }
+
+    setLoading(false);
+  };
 
   const handleDemo = () => {
     navigate("/dashboard")
