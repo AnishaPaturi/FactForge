@@ -1,182 +1,300 @@
 import { useState } from "react";
 
-const styles = `
-/* (keep your full styles exactly as-is — no changes needed) */
-`;
-
 const VERDICTS = {
-  true: { label: "True", badgeClass: "badge-true", borderClass: "verdict-true", barClass: "bar-true" },
-  false: { label: "False", badgeClass: "badge-false", borderClass: "verdict-false", barClass: "bar-false" },
-  partial: { label: "Partially True", badgeClass: "badge-partial", borderClass: "verdict-partial", barClass: "bar-partial" },
-  unverifiable: { label: "Unverifiable", badgeClass: "badge-unverifiable", borderClass: "verdict-unverifiable", barClass: "bar-unverifiable" },
-};
-
-const STANCE_CLASS = {
-  Agree: "rc-stance rc-stance-agree",
-  Disagree: "rc-stance rc-stance-disagree",
-  Neutral: "rc-stance rc-stance-neutral",
-};
-
-const STANCE_ICON = {
-  Agree: "🟢",
-  Disagree: "🔴",
-  Neutral: "⚪",
+  true: { label: "TRUE", color: "#4ade80" },
+  false: { label: "FALSE", color: "#f87171" },
+  partial: { label: "PARTIAL", color: "#fbbf24" },
+  unverifiable: { label: "UNVERIFIABLE", color: "#64748b" },
 };
 
 export default function ResultCard({
   index = 0,
   claim,
   verdict,
-  confidence,
-  explanation,
+  confidence = 0,
+  explanation = "",
   sources = [],
-  source_analysis = null,
 }) {
-  const [expanded, setExpanded] = useState(true);
+  const [open, setOpen] = useState(true);
 
-  const key = verdict?.toLowerCase().replace("partially true", "partial");
+  const key = verdict?.toLowerCase() || "unverifiable";
   const cfg = VERDICTS[key] || VERDICTS.unverifiable;
 
-  const agreementScore = source_analysis?.agreement_score ?? 0;
-  const counts = source_analysis?.counts || {
-    agree: 0,
-    disagree: 0,
-    neutral: 0,
+  // normalize backend score
+  const normalizeScore = (src) => {
+    let raw =
+      src.score ??
+      src.credibility ??
+      src.relevance ??
+      src.rating ??
+      null;
+
+    if (raw === null) return 65;
+
+    if (raw <= 10) return Math.round(raw * 10);
+    if (raw <= 100) return Math.round(raw);
+
+    return 65;
   };
 
   return (
-    <>
-      <style>{styles}</style>
+    <div
+      style={{
+        background: "rgba(4,14,28,0.85)",
+        border: `1px solid ${cfg.color}40`,
+        borderRadius: 16,
+        padding: "1.2rem",
+        marginBottom: "1.2rem",
+        backdropFilter: "blur(12px)",
+      }}
+    >
+      {/* HEADER */}
+      <div onClick={() => setOpen(!open)} style={{ cursor: "pointer" }}>
+        <p style={{ fontWeight: 600, fontSize: 16 }}>
+          {index + 1}. {claim}
+        </p>
 
-      <div className={`rc-card ${cfg.borderClass}`}>
-        {/* HEADER */}
-        <button className="rc-header" onClick={() => setExpanded((p) => !p)}>
-          <span className="rc-index">
-            {String(index + 1).padStart(2, "0")}
+        <div style={{ display: "flex", gap: 10, marginTop: 8 }}>
+          <span
+            style={{
+              background: cfg.color + "20",
+              color: cfg.color,
+              padding: "4px 12px",
+              borderRadius: 20,
+              fontSize: 12,
+              fontWeight: 600,
+            }}
+          >
+            {cfg.label}
           </span>
 
-          <div className="rc-header-body">
-            <p className="rc-claim-text">{claim}</p>
+          <span style={{ fontSize: 12 }}>🎯 {confidence}%</span>
+        </div>
 
-            <div className="rc-meta-row">
-              <span className={cfg.badgeClass}>{cfg.label}</span>
+        {/* CONFIDENCE BAR */}
+        <div
+          style={{
+            height: 6,
+            borderRadius: 10,
+            background: "rgba(255,255,255,0.08)",
+            overflow: "hidden",
+            marginTop: 8,
+          }}
+        >
+          <div
+            style={{
+              width: `${confidence}%`,
+              height: "100%",
+              background: "linear-gradient(90deg, #00d4ff, #7dd3fc)",
+              boxShadow: "0 0 10px rgba(0,212,255,0.5)",
+            }}
+          />
+        </div>
+      </div>
 
-              <div className="rc-conf-wrap">
-                <div className="rc-conf-track">
-                  <div
-                    className={`rc-conf-bar ${cfg.barClass}`}
-                    style={{ width: `${confidence}%` }}
-                  />
-                </div>
-                <span className="rc-conf-label">{confidence}%</span>
-              </div>
-            </div>
-          </div>
-
-          <svg
-            width="16"
-            height="16"
-            viewBox="0 0 16 16"
-            fill="none"
-            className={`rc-chevron${expanded ? " open" : ""}`}
+      {/* BODY */}
+      {open && (
+        <div style={{ marginTop: 14 }}>
+          {/* EXPLANATION */}
+          <p
+            style={{
+              fontSize: 11,
+              letterSpacing: "0.1em",
+              color: "#00d4ff",
+              marginBottom: 6,
+            }}
           >
-            <path
-              d="M4 6l4 4 4-4"
-              stroke="rgba(255,255,255,0.5)"
-              strokeWidth="1.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-        </button>
+            AI EXPLANATION
+          </p>
 
-        {/* BODY */}
-        {expanded && (
-          <div className="rc-body">
-            {/* AI Analysis */}
-            <div>
-              <p className="rc-section-label">AI Analysis</p>
-              <p className="rc-explanation">{explanation}</p>
-            </div>
+          <p
+            style={{
+              fontSize: 14,
+              color: "#cbd5f5",
+              lineHeight: 1.6,
+            }}
+          >
+            🧠 {explanation}
+          </p>
 
-            {/* AGREEMENT */}
-            {source_analysis && (
-              <div>
-                <p className="rc-section-label">
-                  Source Agreement ({agreementScore}%)
-                </p>
+          {/* 🔥 PREMIUM SOURCES */}
+          {sources.length > 0 && (
+            <div style={{ marginTop: 22 }}>
+              <p
+                style={{
+                  fontSize: 11,
+                  letterSpacing: "0.14em",
+                  color: "#00d4ff",
+                  marginBottom: 12,
+                }}
+              >
+                SOURCES
+              </p>
 
-                <div className="rc-agreement">
-                  <div className="rc-agreement-track">
+              {sources.map((src, i) => {
+                const score = normalizeScore(src);
+
+                const getColor = (score) => {
+                  if (score >= 80) return "#4ade80";
+                  if (score >= 60) return "#fbbf24";
+                  return "#f87171";
+                };
+
+                const color = getColor(score);
+
+                // extract domain
+                const domain = (() => {
+                  try {
+                    return new URL(src.url).hostname.replace("www.", "");
+                  } catch {
+                    return "source";
+                  }
+                })();
+
+                // badge logic
+                const getBadge = () => {
+                  if (domain.includes("gov"))
+                    return { label: "GOV", color: "#22c55e" };
+                  if (domain.includes("edu"))
+                    return { label: "EDU", color: "#3b82f6" };
+                  if (domain.includes("org"))
+                    return { label: "ORG", color: "#a855f7" };
+                  return { label: "WEB", color: "#64748b" };
+                };
+
+                const badge = getBadge();
+
+                return (
+                  <div
+                    key={i}
+                    style={{
+                      padding: "12px 14px",
+                      borderRadius: 12,
+                      background: "rgba(255,255,255,0.035)",
+                      border: "1px solid rgba(255,255,255,0.08)",
+                      marginBottom: 10,
+                      transition: "all 0.2s ease",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.transform = "translateY(-2px)";
+                      e.currentTarget.style.boxShadow =
+                        "0 0 20px rgba(0,200,255,0.15)";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.transform = "translateY(0)";
+                      e.currentTarget.style.boxShadow = "none";
+                    }}
+                  >
+                    {/* TOP ROW */}
                     <div
-                      className="rc-agreement-bar"
-                      style={{ width: `${agreementScore}%` }}
-                    />
-                  </div>
-
-                  <div className="rc-agreement-counts">
-                    <span>🟢 {counts.agree}</span>
-                    <span>🔴 {counts.disagree}</span>
-                    <span>⚪ {counts.neutral}</span>
-                  </div>
-
-                  {source_analysis.insight && (
-                    <p className="rc-agreement-insight">
-                      "{source_analysis.insight}"
-                    </p>
-                  )}
-                </div>
-              </div>
-            )}
-
-            {/* SOURCES */}
-            {key !== "unverifiable" && sources.length > 0 && (
-              <div>
-                <p className="rc-section-label">Sources</p>
-
-                {sources.map((src, i) => {
-                  const stance = src?.stance || "Neutral";
-                  const stanceClass =
-                    STANCE_CLASS[stance] || STANCE_CLASS.Neutral;
-                  const icon = STANCE_ICON[stance] || "⚪";
-
-                  return (
-                    <a
-                      key={i}
-                      href={src.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="rc-source-row"
+                      style={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                        gap: 10,
+                      }}
                     >
-                      <div className="rc-source-left">
-                        <span>{icon}</span>
-                        <span className="rc-source-title">
-                          {src.title || src.label || src.url}
+                      <div
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 10,
+                          overflow: "hidden",
+                        }}
+                      >
+                        {/* favicon */}
+                        <img
+                          src={`https://www.google.com/s2/favicons?domain=${domain}`}
+                          alt=""
+                          style={{ width: 16, height: 16 }}
+                        />
+
+                        <a
+                          href={src.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          style={{
+                            fontSize: 13,
+                            color: "#7dd3fc",
+                            textDecoration: "none",
+                            whiteSpace: "nowrap",
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                            maxWidth: "220px",
+                          }}
+                        >
+                          {src.label || src.title || domain}
+                        </a>
+                      </div>
+
+                      <div style={{ display: "flex", gap: 10 }}>
+                        {/* badge */}
+                        <span
+                          style={{
+                            fontSize: 10,
+                            padding: "3px 8px",
+                            borderRadius: 20,
+                            background: badge.color + "20",
+                            color: badge.color,
+                            fontWeight: 700,
+                          }}
+                        >
+                          {badge.label}
+                        </span>
+
+                        {/* score */}
+                        <span
+                          style={{
+                            fontSize: 12,
+                            fontWeight: 700,
+                            color,
+                          }}
+                        >
+                          ⭐ {score}%
                         </span>
                       </div>
+                    </div>
 
-                      <div className="rc-source-right">
-                        <span className={stanceClass}>{stance}</span>
+                    {/* GRADIENT BAR */}
+                    <div
+                      style={{
+                        height: 5,
+                        borderRadius: 10,
+                        background: "rgba(255,255,255,0.06)",
+                        marginTop: 8,
+                        overflow: "hidden",
+                      }}
+                    >
+                      <div
+                        style={{
+                          width: `${score}%`,
+                          height: "100%",
+                          borderRadius: 10,
+                          background: `linear-gradient(90deg, ${color}, ${color}cc)`,
+                          boxShadow: `0 0 10px ${color}55`,
+                        }}
+                      />
+                    </div>
 
-                        {src.score != null && (
-                          <span className="rc-score">{src.score}</span>
-                        )}
-
-                        {src.credibility != null && (
-                          <span className="rc-credibility">
-                            {src.credibility}
-                          </span>
-                        )}
-                      </div>
-                    </a>
-                  );
-                })}
-              </div>
-            )}
-          </div>
-        )}
-      </div>
-    </>
+                    {/* snippet */}
+                    {src.snippet && (
+                      <p
+                        style={{
+                          fontSize: 12,
+                          marginTop: 8,
+                          color: "#94a3b8",
+                        }}
+                      >
+                        {src.snippet}
+                      </p>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      )}
+    </div>
   );
 }
-

@@ -579,15 +579,39 @@ function AiDetectionBox({ probability }) {
 
 /* ─── Topic Warning ─────────────────────────────────────────────── */
 function TopicWarning({ topic, warning }) {
-  if (!warning || warning.level === "none") return null
+  if (!warning || warning.level === "none") return null;
+
+  const colors = {
+    high: "#f87171",
+    medium: "#fbbf24",
+    low: "#60a5fa",
+  };
+
   return (
-    <div className={`db-topic-card ${warning.level}`}>
-      <p className="db-topic-tag">Detected Topic</p>
-      <p className="db-topic-name">{topic}</p>
-      <p className="db-topic-msg">{warning.message}</p>
+    <div
+      style={{
+        padding: "1rem",
+        borderRadius: 14,
+        border: `1px solid ${colors[warning.level]}40`,
+        background: `${colors[warning.level]}10`,
+        marginBottom: "1rem",
+      }}
+    >
+      <p style={{ fontSize: 12, opacity: 0.7 }}>
+        ⚠️ HIGH-RISK CONTENT
+      </p>
+
+      <p style={{ fontWeight: 600, marginTop: 4 }}>
+        Topic: {topic}
+      </p>
+
+      <p style={{ fontSize: 13, marginTop: 4 }}>
+        {warning.message}
+      </p>
     </div>
-  )
+  );
 }
+
 
 /* ─── Main Dashboard ────────────────────────────────────────────── */
 export default function Dashboard() {
