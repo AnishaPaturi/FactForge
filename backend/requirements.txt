@@ -7,3 +7,4 @@ pydantic
 reportlab
 pytz
 passlib[bcrypt]
+bcrypt
