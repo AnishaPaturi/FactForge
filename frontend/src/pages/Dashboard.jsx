@@ -579,12 +579,15 @@ function AiDetectionBox({ probability }) {
 
 /* ─── Topic Warning ─────────────────────────────────────────────── */
 function TopicWarning({ topic, warning }) {
-  if (!warning || warning.level === "none") return null
+  // if (!warning || warning.level === "none") return null
   return (
-    <div className={`db-topic-card ${warning.level}`}>
+    <div className={`db-topic-card ${warning.level || "low"} `}>
       <p className="db-topic-tag">Detected Topic</p>
       <p className="db-topic-name">{topic}</p>
-      <p className="db-topic-msg">{warning.message}</p>
+      {/* <p className="db-topic-msg">{warning.message}</p> */}
+      {warning?.message && (
+        <p className="db-topic-msg">{warning.message}</p>
+      )}
     </div>
   )
 }

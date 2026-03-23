@@ -97,10 +97,18 @@ def generate_better_explanation(claim, verdict, evidence):
 def run_pipeline(text: str):
     ai_score = detect_ai(text)
 
-    topic = detect_topic(text)
-    warning = generate_warning(topic)
+    # topic = detect_topic(text)
+    # warning = generate_warning(topic)
 
+    # claims = extract_claims(text)
     claims = extract_claims(text)
+
+    # detect topic from extracted claims
+    combined_text = " ".join(claims) if claims else text
+    topic = detect_topic(combined_text)
+
+    warning = generate_warning(topic)
+    
     results = []
 
     for claim in claims:
