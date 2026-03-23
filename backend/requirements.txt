@@ -6,3 +6,4 @@ sqlalchemy
 pydantic
 reportlab
 pytz
+passlib[bcrypt]
