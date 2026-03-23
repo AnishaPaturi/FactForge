@@ -46,14 +46,14 @@ def generate_pdf(data):
         topMargin=28*mm, bottomMargin=22*mm,
     )
 
-    # 🔥 FIXED HEADER SPACING
+  
     title_style = ParagraphStyle(
-        "Title",
-        fontName="Helvetica-Bold",
-        fontSize=24,
-        alignment=1,
-        textColor=PRIMARY,
-        spaceAfter=14
+    "Title",
+    fontName="Helvetica-Bold",
+    fontSize=24,
+    alignment=1,
+    textColor=PRIMARY,
+    spaceAfter=6  
     )
 
     subtitle_style = ParagraphStyle(
@@ -61,8 +61,8 @@ def generate_pdf(data):
         fontSize=10,
         alignment=1,
         textColor=MUTED,
-        leading=14,
-        spaceAfter=18
+        leading=13,
+        spaceAfter=14  # 🔥 balanced spacing
     )
 
     claim_style = ParagraphStyle(
@@ -77,7 +77,7 @@ def generate_pdf(data):
         "Verdict",
         fontName="Helvetica-Bold",
         fontSize=12,
-        spaceAfter=4
+        spaceAfter=1
     )
 
     explanation_style = ParagraphStyle(
@@ -99,6 +99,10 @@ def generate_pdf(data):
 
     # HEADER
     content.append(Paragraph("FactForge Report", title_style))
+
+  
+    content.append(Spacer(1, 12))
+
     content.append(Paragraph(
         f"Generated on {current_time.strftime('%B %d, %Y at %I:%M %p IST')}",
         subtitle_style
@@ -182,7 +186,7 @@ def generate_pdf(data):
                 f"<font color='#{v_color.hexval()[2:]}'><b>{verdict.upper()}</b></font>",
                 verdict_style
             ), ""],
-            [Spacer(1, 4), ""],
+            
             [confidence_row, ""],
             [Paragraph(bullet_text, explanation_style), ""]
         ]
