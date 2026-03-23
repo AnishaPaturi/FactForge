@@ -46,38 +46,58 @@ def generate_pdf(data):
         topMargin=28*mm, bottomMargin=22*mm,
     )
 
+    # 🔥 FIXED HEADER SPACING
     title_style = ParagraphStyle(
-        "Title", fontName="Helvetica-Bold", fontSize=24,
-        alignment=1, textColor=PRIMARY, spaceAfter=10
+        "Title",
+        fontName="Helvetica-Bold",
+        fontSize=24,
+        alignment=1,
+        textColor=PRIMARY,
+        spaceAfter=14
     )
 
     subtitle_style = ParagraphStyle(
-        "Subtitle", fontSize=9, alignment=1,
-        textColor=MUTED, spaceAfter=16
+        "Subtitle",
+        fontSize=10,
+        alignment=1,
+        textColor=MUTED,
+        leading=14,
+        spaceAfter=18
     )
 
     claim_style = ParagraphStyle(
-        "Claim", fontName="Helvetica-Bold", fontSize=11,
-        textColor=PRIMARY, spaceAfter=6
-    )
-
-    verdict_style = ParagraphStyle(
-        "Verdict", fontName="Helvetica-Bold", fontSize=12,
+        "Claim",
+        fontName="Helvetica-Bold",
+        fontSize=11,
+        textColor=PRIMARY,
         spaceAfter=6
     )
 
+    verdict_style = ParagraphStyle(
+        "Verdict",
+        fontName="Helvetica-Bold",
+        fontSize=12,
+        spaceAfter=4
+    )
+
     explanation_style = ParagraphStyle(
-        "Explanation", fontSize=10, leading=15, spaceAfter=6
+        "Explanation",
+        fontSize=10,
+        leading=15,
+        spaceAfter=6
     )
 
     section_style = ParagraphStyle(
-        "Section", fontName="Helvetica-Bold", fontSize=11,
-        textColor=MUTED, spaceAfter=6
+        "Section",
+        fontName="Helvetica-Bold",
+        fontSize=11,
+        textColor=MUTED,
+        spaceAfter=6
     )
 
     content = []
 
-    # Header
+    # HEADER
     content.append(Paragraph("FactForge Report", title_style))
     content.append(Paragraph(
         f"Generated on {current_time.strftime('%B %d, %Y at %I:%M %p IST')}",
@@ -86,7 +106,7 @@ def generate_pdf(data):
     content.append(HRFlowable(width="100%", thickness=1.5, color=ACCENT))
     content.append(Spacer(1, 12))
 
-    # AI Probability
+    # AI PROBABILITY
     ai_prob = data.get("aiProbability", 0)
 
     ai_table = Table(
@@ -119,8 +139,8 @@ def generate_pdf(data):
         v_color = VERDICT_COLOR.get(verdict, MUTED)
         v_bg = VERDICT_BG.get(verdict, LIGHT_BG)
 
-        # Bar
-        total_width = 300
+        # 🔥 FIXED BAR
+        total_width = 260
         filled_width = int((claim["confidence"] / 100) * total_width)
 
         bar = Table(
@@ -133,15 +153,24 @@ def generate_pdf(data):
             ("BACKGROUND", (1, 0), (1, 0), colors.lightgrey),
         ]))
 
+        # 🔥 FIXED ALIGNMENT
         confidence_row = Table(
             [[
                 Paragraph(f"<b>Confidence: {claim['confidence']}%</b>", explanation_style),
                 bar
             ]],
-            colWidths=["35%", "65%"]
+            colWidths=["30%", "70%"]
         )
 
-        # Explanation → bullets
+        confidence_row.setStyle(TableStyle([
+            ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
+            ("LEFTPADDING", (0, 0), (-1, -1), 0),
+            ("RIGHTPADDING", (0, 0), (-1, -1), 0),
+            ("TOPPADDING", (0, 0), (-1, -1), 2),
+            ("BOTTOMPADDING", (0, 0), (-1, -1), 2),
+        ]))
+
+        # Explanation bullets
         explanation = claim.get("explanation", "")
         points = explanation.split(". ")
         bullet_text = "<br/>".join([f"• {p.strip()}" for p in points if p.strip()])
@@ -153,11 +182,12 @@ def generate_pdf(data):
                 f"<font color='#{v_color.hexval()[2:]}'><b>{verdict.upper()}</b></font>",
                 verdict_style
             ), ""],
+            [Spacer(1, 4), ""],
             [confidence_row, ""],
             [Paragraph(bullet_text, explanation_style), ""]
         ]
 
-        # 🔥 SOURCES (NEW)
+        # 🔥 SOURCES
         sources = claim.get("sources", [])
         if sources:
             source_lines = []
