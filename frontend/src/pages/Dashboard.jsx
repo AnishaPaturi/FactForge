@@ -1,7 +1,7 @@
 
 
 import { useState, useEffect } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useParams} from "react-router-dom";
 import Navbar from "../components/Navbar";
 import InputBox from "../components/InputBox";
 import ProgressStepper from "../components/ProgressStepper";
@@ -15,7 +15,7 @@ import { downloadPDF } from "../services/api";
 
 /* ─── Scoped styles ─────────────────────────────────────────────── */
 const styles = `
-  @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
+ 
 
   /* ── Fixed animated background ── */
   .db-bg {
@@ -601,7 +601,11 @@ export default function Dashboard() {
   const [activeTab, setActiveTab]       = useState("overview") // "overview" | "analysis" | "claims"
   const [suggestions, setSuggestions]   = useState(() => pickRandom())
 
+  const [reportId, setReportId] = useState(null)
+
   const location = useLocation()
+
+  const { id } = useParams()
 
   const { text: greetText, emoji } = getGreeting()
 
@@ -612,6 +616,36 @@ export default function Dashboard() {
       window.history.replaceState({}, '')
     }
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
+
+
+
+  useEffect(() => {
+  if (id) {
+    const API_BASE = import.meta.env.VITE_API_URL
+
+    fetch(`${API_BASE}/report/${id}`)
+      .then(res => res.json())
+      .then(data => {
+        if (!data || !data.claims) return
+
+        setReportId(id)
+
+        const normalized = data.claims.map((c) => ({
+          ...c,
+          verdict: mapVerdict(c.verdict),
+        }))
+
+        setClaims(normalized)
+        setAiProbability(data.ai_probability || 0)
+        setTopic(data.topic || "general")
+        setWarning(data.warning || null)
+        setUiState("results")
+      })
+  }
+}, [id])
+
+
+
 
   const handleVerify = async (input) => {
     if (!input?.trim()) return
@@ -630,6 +664,7 @@ export default function Dashboard() {
         body: JSON.stringify({ text: input }),
       })
       const data = await response.json()
+      setReportId(data.report_id)
       setStep(3)
 
       if (Array.isArray(data.claims)) {
@@ -760,6 +795,21 @@ export default function Dashboard() {
                     <path d="M6.5 1v8M3.5 6.5l3 3 3-3M1 10.5h11" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
                   </svg>
                   Download Report
+                </button>
+                <button
+                  className="db-btn-reset"
+                  onClick={() => {
+                    if (!reportId) {
+                      alert("Report not ready")
+                      return
+                    }
+
+                    const shareUrl = `${window.location.origin}/report/${reportId}`
+                    navigator.clipboard.writeText(shareUrl)
+                    alert("Copied to clipboard!")
+                  }}
+                >
+                  🔗 Share
                 </button>
                 <button className="db-btn-reset" onClick={handleReset}>
                   <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
@@ -921,3 +971,5 @@ export default function Dashboard() {
     </>
   )
 }
+
+
