@@ -8,7 +8,7 @@ TOPIC_KEYWORDS = {
         "doctor", "health", "virus", "cancer", "therapy","hospital"
     ],
     "politics": [
-        "government", "election", "minister", "policy",
+        "government", "elections", "minister", "policy",
         "president", "parliament", "vote", "law","vote","congress","bjp"
     ],
     "technology": [
