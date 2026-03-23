@@ -6,80 +6,72 @@ const API = axios.create({
   baseURL: API_BASE,
 });
 
-// ✅ LOGIN
+// ✅ LOGIN (CLEAN)
 export const loginUser = async (data) => {
-  const routes = [
-    "/api/login",
-    "/login",
-    "/login",
-    "/auth/login"
-  ];
-
-  for (let route of routes) {
-    try {
-      console.log("Trying route:", route);
-      const res = await API.post(route, data);
-      return res.data;
-    } catch (err) {
-      console.warn("Failed route:", route);
-    }
+  try {
+    const res = await API.post("/login", data);
+    return res.data;
+  } catch (err) {
+    console.error("Login Error:", err.response?.data || err.message);
+    throw err;
   }
-
-  throw new Error("All login routes failed");
 };
 
-
-// ✅ SIGNUP (ROBUST VERSION)
+// ✅ REGISTER (CLEAN)
 export const registerUser = async (data) => {
-  const routes = [
-    "/api/register",
-    "/register",
-    "/signup",
-    "/auth/register"
-  ];
-
-  for (let route of routes) {
-    try {
-      console.log("Trying route:", route);
-      const res = await API.post(route, data);
-      return res.data;
-    } catch (err) {
-      console.warn("Failed route:", route);
-    }
+  try {
+    const res = await API.post("/register", data);
+    return res.data;
+  } catch (err) {
+    console.error("Register Error:", err.response?.data || err.message);
+    throw err;
   }
-
-  throw new Error("All register routes failed");
 };
 
-// Analyze text
+// ✅ ANALYZE TEXT
 export const analyzeText = async (text) => {
-  const res = await API.post("/analyze", { text });
-  return res.data;
+  try {
+    const res = await API.post("/analyze", { text });
+    return res.data;
+  } catch (err) {
+    console.error("Analyze Error:", err.response?.data || err.message);
+    throw err;
+  }
 };
 
-// History
+// ✅ HISTORY
 export const getHistory = async () => {
-  const res = await API.get("/history");
-  return res.data;
+  try {
+    const res = await API.get("/history");
+    return res.data;
+  } catch (err) {
+    console.error("History Error:", err.response?.data || err.message);
+    throw err;
+  }
 };
 
-// PDF
+// ✅ PDF DOWNLOAD
 export const downloadPDF = async (data) => {
-  const response = await fetch(`${API_BASE}/generate-pdf`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(data),
-  });
+  try {
+    const response = await fetch(`${API_BASE}/generate-pdf`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(data),
+    });
 
-  if (!response.ok) throw new Error("Failed to generate PDF");
+    if (!response.ok) throw new Error("Failed to generate PDF");
 
-  const blob = await response.blob();
+    const blob = await response.blob();
 
-  const url = window.URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = "FactForge_Report.pdf";
-  a.click();
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "FactForge_Report.pdf";
+    a.click();
+  } catch (err) {
+    console.error("PDF Error:", err.message);
+    throw err;
+  }
 };
