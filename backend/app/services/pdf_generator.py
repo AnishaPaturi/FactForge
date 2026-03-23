@@ -78,7 +78,7 @@ def generate_pdf(data):
     # Header
     content.append(Paragraph("FactForge Report", title_style))
     content.append(Paragraph(
-        f"Generated on {current_time.strftime('%B %d, %Y')}",
+        f"Generated on {current_time.strftime('%B %d, %Y at %I:%M %p IST')}",
         subtitle_style
     ))
     content.append(HRFlowable(width="100%", thickness=1.5, color=ACCENT))
