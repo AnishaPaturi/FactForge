@@ -24,6 +24,7 @@ VERDICT_BG = {
     "partial": colors.HexColor("#FEF5EC"),
 }
 
+
 def _header_footer(canvas, doc):
     canvas.saveState()
     canvas.setFont("Helvetica", 8)
@@ -45,14 +46,14 @@ def generate_pdf(data):
         topMargin=28*mm, bottomMargin=22*mm,
     )
 
-    # Styles
     title_style = ParagraphStyle(
         "Title", fontName="Helvetica-Bold", fontSize=24,
-        alignment=1, textColor=PRIMARY, spaceAfter=6
+        alignment=1, textColor=PRIMARY, spaceAfter=10
     )
 
     subtitle_style = ParagraphStyle(
-        "Subtitle", fontSize=9, alignment=1, textColor=MUTED, spaceAfter=10
+        "Subtitle", fontSize=9, alignment=1,
+        textColor=MUTED, spaceAfter=16
     )
 
     claim_style = ParagraphStyle(
@@ -61,7 +62,8 @@ def generate_pdf(data):
     )
 
     verdict_style = ParagraphStyle(
-        "Verdict", fontName="Helvetica-Bold", fontSize=12, spaceAfter=6
+        "Verdict", fontName="Helvetica-Bold", fontSize=12,
+        spaceAfter=6
     )
 
     explanation_style = ParagraphStyle(
@@ -82,9 +84,9 @@ def generate_pdf(data):
         subtitle_style
     ))
     content.append(HRFlowable(width="100%", thickness=1.5, color=ACCENT))
-    content.append(Spacer(1, 10))
+    content.append(Spacer(1, 12))
 
-    # 🔥 AI Probability (RESTORED)
+    # AI Probability
     ai_prob = data.get("aiProbability", 0)
 
     ai_table = Table(
@@ -106,54 +108,79 @@ def generate_pdf(data):
     ]))
 
     content.append(ai_table)
-    content.append(Spacer(1, 12))
+    content.append(Spacer(1, 14))
 
-    # Section title
     content.append(Paragraph("Claims Analysis", section_style))
     content.append(HRFlowable(width="100%", thickness=0.5, color=BORDER))
-    content.append(Spacer(1, 8))
+    content.append(Spacer(1, 10))
 
-    # Claims
     for i, claim in enumerate(data.get("claims", []), start=1):
-        verdict = claim.get("verdict", "unknown").lower()
+        verdict = claim.get("verdict", "").lower()
         v_color = VERDICT_COLOR.get(verdict, MUTED)
         v_bg = VERDICT_BG.get(verdict, LIGHT_BG)
 
-        # Progress bar (background + fill)
-        total_width = 400
+        # Bar
+        total_width = 300
         filled_width = int((claim["confidence"] / 100) * total_width)
 
-        bar = Table([["", ""]], colWidths=[filled_width, total_width - filled_width], rowHeights=[6])
+        bar = Table(
+            [["", ""]],
+            colWidths=[filled_width, total_width - filled_width],
+            rowHeights=[6]
+        )
         bar.setStyle(TableStyle([
             ("BACKGROUND", (0, 0), (0, 0), v_color),
             ("BACKGROUND", (1, 0), (1, 0), colors.lightgrey),
         ]))
 
-        # Bullet explanation
+        confidence_row = Table(
+            [[
+                Paragraph(f"<b>Confidence: {claim['confidence']}%</b>", explanation_style),
+                bar
+            ]],
+            colWidths=["35%", "65%"]
+        )
+
+        # Explanation → bullets
         explanation = claim.get("explanation", "")
         points = explanation.split(". ")
-
-        bullet_text = "<br/>".join([
-            f"• {p.strip()}" for p in points if p.strip()
-        ])
+        bullet_text = "<br/>".join([f"• {p.strip()}" for p in points if p.strip()])
 
         inner = [
             [Paragraph(f"Claim {i}", explanation_style), ""],
             [Paragraph(claim.get("claim", ""), claim_style), ""],
             [Paragraph(
-                f"<font color='#{v_color.hexval()[2:]}'><b>{verdict.upper()}</b></font> "
-                f"<b>• {claim['confidence']}%</b>",
+                f"<font color='#{v_color.hexval()[2:]}'><b>{verdict.upper()}</b></font>",
                 verdict_style
             ), ""],
-            [bar, ""],
+            [confidence_row, ""],
             [Paragraph(bullet_text, explanation_style), ""]
         ]
+
+        # 🔥 SOURCES (NEW)
+        sources = claim.get("sources", [])
+        if sources:
+            source_lines = []
+            for src in sources:
+                label = src.get("label", "Source")
+                url = src.get("url", "#")
+
+                source_lines.append(
+                    f"• <link href='{url}' color='#2E86DE'>{label}</link>"
+                )
+
+            sources_text = "<br/>".join(source_lines)
+
+            inner.append([
+                Paragraph("<b>Sources:</b><br/>" + sources_text, explanation_style),
+                ""
+            ])
 
         card = Table(inner, colWidths=["100%", "0%"])
         card.setStyle(TableStyle([
             ("BACKGROUND", (0, 0), (-1, -1), v_bg),
             ("BOX", (0, 0), (-1, -1), 0.5, BORDER),
-            ("LINEBEFORE", (0, 0), (0, -1), 4, v_color),  # 🔥 left color strip
+            ("LINEBEFORE", (0, 0), (0, -1), 4, v_color),
             ("LEFTPADDING", (0, 0), (-1, -1), 12),
             ("RIGHTPADDING", (0, 0), (-1, -1), 10),
             ("TOPPADDING", (0, 0), (-1, -1), 8),
