@@ -68,23 +68,23 @@ With the rapid rise of AI-generated content and misinformation:
 
 ## 🏗️ System Architecture
 
-
+```
 User Input
-↓
+   ↓
 Claim Extraction
-↓
+   ↓
 Topic Detection
-↓
+   ↓
 Evidence Retrieval
-↓
+   ↓
 Verification Engine
-↓
+   ↓
 Bias + AI Detection
-↓
+   ↓
 Explanation Generation
-↓
+   ↓
 Database Storage → API Response
-
+```
 
 Core pipeline handled in:
 - `backend/app/services/orchestrator.py`
@@ -110,45 +110,45 @@ Core pipeline handled in:
 
 ### 🔹 Backend
 
-
+```
 backend/
 │
 ├── app/
-│ ├── api/
-│ │ ├── routes.py
-│ │ └── auth_routes.py
-│ │
-│ ├── core/
-│ │ ├── config.py
-│ │ └── constants.py
-│ │
-│ ├── models/
-│ │ ├── db_models.py
-│ │ └── schemas.py
-│ │
-│ ├── prompts/
-│ │ ├── extraction_prompt.txt
-│ │ └── verification_prompt.txt
-│ │
-│ ├── services/
-│ │ ├── orchestrator.py
-│ │ ├── claim_extractor.py
-│ │ ├── topic_detector.py
-│ │ ├── search_service.py
-│ │ ├── verifier.py
-│ │ ├── bias_indicator.py
-│ │ ├── ai_detector.py
-│ │ ├── credibility_service.py
-│ │ ├── db_service.py
-│ │ ├── pdf_generator.py
-│ │ └── api.js
-│ │
-│ ├── utils/
-│ │ ├── helpers.py
-│ │ └── logger.py
-│ │
-│ ├── db.py
-│ └── main.py
+│   ├── api/
+│   │   ├── routes.py
+│   │   └── auth_routes.py
+│   │
+│   ├── core/
+│   │   ├── config.py
+│   │   └── constants.py
+│   │
+│   ├── models/
+│   │   ├── db_models.py
+│   │   └── schemas.py
+│   │
+│   ├── prompts/
+│   │   ├── extraction_prompt.txt
+│   │   └── verification_prompt.txt
+│   │
+│   ├── services/
+│   │   ├── orchestrator.py
+│   │   ├── claim_extractor.py
+│   │   ├── topic_detector.py
+│   │   ├── search_service.py
+│   │   ├── verifier.py
+│   │   ├── bias_indicator.py
+│   │   ├── ai_detector.py
+│   │   ├── credibility_service.py
+│   │   ├── db_service.py
+│   │   ├── pdf_generator.py
+│   │   └── api.js
+│   │
+│   ├── utils/
+│   │   ├── helpers.py
+│   │   └── logger.py
+│   │
+│   ├── db.py
+│   └── main.py
 │
 ├── tests/
 ├── .env
@@ -156,44 +156,44 @@ backend/
 ├── requirements.txt
 ├── run.py
 └── render.yaml
-
+```
 
 ---
 
 ### 🔹 Frontend
 
-
+```
 frontend/
 │
 ├── src/
-│ ├── components/
-│ │ ├── AnalyticsPanel.jsx
-│ │ ├── ClaimCard.jsx
-│ │ ├── ClaimsList.jsx
-│ │ ├── ConfidenceChart.jsx
-│ │ ├── Footer.jsx
-│ │ ├── InputBox.jsx
-│ │ ├── Loader.jsx
-│ │ ├── Navbar.jsx
-│ │ ├── ProgressStepper.jsx
-│ │ ├── ResultBreakdownChart.jsx
-│ │ ├── ResultCard.jsx
-│ │ ├── SummaryStats.jsx
-│ │ └── WarningBanner.jsx
-│ │
-│ ├── pages/
-│ │ ├── LandingPage.jsx
-│ │ ├── Login.jsx
-│ │ ├── Signup.jsx
-│ │ ├── Dashboard.jsx
-│ │ └── History.jsx
-│ │
-│ ├── services/
-│ │ └── api.js
-│ │
-│ ├── App.jsx
-│ ├── main.jsx
-│ └── index.css
+│   ├── components/
+│   │   ├── AnalyticsPanel.jsx
+│   │   ├── ClaimCard.jsx
+│   │   ├── ClaimsList.jsx
+│   │   ├── ConfidenceChart.jsx
+│   │   ├── Footer.jsx
+│   │   ├── InputBox.jsx
+│   │   ├── Loader.jsx
+│   │   ├── Navbar.jsx
+│   │   ├── ProgressStepper.jsx
+│   │   ├── ResultBreakdownChart.jsx
+│   │   ├── ResultCard.jsx
+│   │   ├── SummaryStats.jsx
+│   │   └── WarningBanner.jsx
+│   │
+│   ├── pages/
+│   │   ├── LandingPage.jsx
+│   │   ├── Login.jsx
+│   │   ├── Signup.jsx
+│   │   ├── Dashboard.jsx
+│   │   └── History.jsx
+│   │
+│   ├── services/
+│   │   └── api.js
+│   │
+│   ├── App.jsx
+│   ├── main.jsx
+│   └── index.css
 │
 ├── index.html
 ├── package.json
@@ -201,7 +201,7 @@ frontend/
 ├── tailwind.config.js
 ├── postcss.config.js
 └── .env
-
+```
 
 ---
 
@@ -211,47 +211,102 @@ frontend/
 
 ```bash
 pip install -r requirements.txt
+```
 
 Or manually:
 
+```bash
 pip install fastapi uvicorn requests python-dotenv sqlalchemy pydantic reportlab pytz passlib bcrypt==4.0.1
-🔹 Frontend
+```
+
+---
+
+### 🔹 Frontend
+
+```bash
 npm install
-🔐 Environment Variables
-Backend .env
+```
+
+---
+
+## 🔐 Environment Variables
+
+### Backend `.env`
+
+```env
 OPENROUTER_API_KEY=your_api_key
 OPENROUTER_BASE_URL=https://openrouter.ai/api/v1
 MODEL_NAME=your_model
 TAVILY_API_KEY=your_api_key
-Frontend .env
+```
+
+### Frontend `.env`
+
+```env
 VITE_API_URL=http://localhost:8000
-🚀 Running the Project
-1️⃣ Clone Repository
+```
+
+---
+
+## 🚀 Running the Project
+
+### 1️⃣ Clone Repository
+
+```bash
 git clone https://github.com/AnishaPaturi/FactForge.git
 cd FactForge
-2️⃣ Start Backend
+```
+
+---
+
+### 2️⃣ Start Backend
+
+```bash
 cd backend
 pip install -r requirements.txt
 uvicorn app.main:app --reload
-3️⃣ Start Frontend
+```
+
+---
+
+### 3️⃣ Start Frontend
+
+```bash
 cd frontend
 npm install
 npm run dev
-📡 API Endpoints
-🔐 Auth
-POST /login
-POST /register
-🧠 Core
-POST /analyze
-GET /history
-POST /generate-pdf
-🧪 Example Request
+```
+
+---
+
+## 📡 API Endpoints
+
+### 🔐 Auth
+- POST /login
+- POST /register
+
+### 🧠 Core
+- POST /analyze
+- GET /history
+- POST /generate-pdf
+
+---
+
+## 🧪 Example Request
+
+```json
 POST /analyze
 
 {
   "text": "The Earth is flat"
 }
-📊 Example Output
+```
+
+---
+
+## 📊 Example Output
+
+```json
 {
   "topic": "Science",
   "claims": [
@@ -263,21 +318,47 @@ POST /analyze
     }
   ]
 }
-🧪 Testing
+```
+
+---
+
+## 🧪 Testing
+
+```bash
 pytest -v
-⚠️ Limitations
-Depends on external APIs
-SQLite not persistent on cloud restarts
-AI-generated explanations may vary
-🔮 Future Improvements
-PostgreSQL integration
-Better source credibility scoring
-Multi-language support
-Advanced analytics dashboard
-👩‍💻 Team
-Anisha
-Sravani
-Jayashree
-🏆 Conclusion
+```
+
+---
+
+## ⚠️ Limitations
+
+- Depends on external APIs  
+- SQLite not persistent on cloud restarts  
+- AI-generated explanations may vary  
+
+---
+
+## 🔮 Future Improvements
+
+- PostgreSQL integration  
+- Better source credibility scoring  
+- Multi-language support  
+- Advanced analytics dashboard  
+
+---
+
+## 👩‍💻 Team
+
+- Anisha  
+- Sravani  
+- Jayashree  
+
+---
+
+## 🏆 Conclusion
 
 FactForge demonstrates how AI can be leveraged to build scalable, explainable, and reliable fact-checking systems to combat misinformation in real time.
+
+---
+
+⭐ If you found this project useful, consider giving it a star!
