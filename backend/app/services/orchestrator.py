@@ -1,6 +1,6 @@
 from app.services.claim_extractor import extract_claims
 from app.services.search_service import search_claim
-from app.services.topic_detector import detect_topic
+# from app.services.topic_detector import detect_topic
 from app.services.bias_indicator import generate_warning
 
 from app.services.verifier import (
@@ -104,10 +104,10 @@ def run_pipeline(text: str):
     claims = extract_claims(text)
 
     # detect topic from extracted claims
-    combined_text = " ".join(claims) if claims else text
-    topic = detect_topic(combined_text)
+    # combined_text = " ".join(claims) if claims else text
+    # topic = detect_topic(combined_text)
 
-    warning = generate_warning(topic)
+    # warning = generate_warning(topic)
     
     results = []
 
