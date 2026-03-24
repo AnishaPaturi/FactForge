@@ -4,7 +4,6 @@ from app.core.config import OPENROUTER_API_KEY, OPENROUTER_BASE_URL, MODEL_NAME
 from app.utils.helpers import load_prompt, safe_request
 
 
-# 🔹 VERIFY CLAIM (unchanged logic, slightly safer)
 def verify_claim(claim: str, evidence: list):
     template = load_prompt("app/prompts/verification_prompt.txt")
 
@@ -21,6 +20,7 @@ def verify_claim(claim: str, evidence: list):
         json_data={
             "model": MODEL_NAME,
             "messages": [{"role": "user", "content": prompt}],
+            "max_tokens": 500 
         },
     )
 
@@ -51,7 +51,6 @@ def verify_claim(claim: str, evidence: list):
         }
 
 
-# 🔥 IMPROVED STANCE CLASSIFIER
 def classify_source_stance(claim: str, evidence: list):
     from app.utils.helpers import safe_request
     from app.core.config import OPENROUTER_API_KEY, OPENROUTER_BASE_URL, MODEL_NAME
@@ -64,17 +63,11 @@ You MUST classify each source STRICTLY:
 
 RULES:
 - Supports claim → Agree
-- Contradicts / says false / myth → Disagree
-- Neutral ONLY if completely unrelated
-
-STRICT:
-- If text says "myth", "false", "incorrect", "not true" → Disagree
-- DO NOT overuse Neutral
+- Contradicts → Disagree
+- Neutral ONLY if unrelated
 
 Return ONLY valid JSON:
-["Agree", "Disagree", "Agree"]
-
-NO explanation.
+["Agree", "Disagree"]
 
 Sources:
 """
@@ -96,6 +89,7 @@ Sources:
         json_data={
             "model": MODEL_NAME,
             "messages": [{"role": "user", "content": prompt}],
+            "max_tokens": 500 
         },
     )
 
@@ -116,7 +110,7 @@ Sources:
     except:
         return ["Neutral"] * len(evidence)
 
-# 🔥 FINAL AGREEMENT (COUNTS + WEIGHTED)
+
 def compute_agreement_score(stances: list, evidence: list):
     agree_count = stances.count("Agree")
     disagree_count = stances.count("Disagree")
@@ -139,33 +133,17 @@ def compute_agreement_score(stances: list, evidence: list):
     total_weight = weighted_agree + weighted_disagree + weighted_neutral
 
     score = round((weighted_agree / total_weight) * 100, 2) if total_weight > 0 else 0
-    
-    if agree_count == 0 and disagree_count > 0:
-        insight = "All sources contradict the claim"
-    # 🔥 BONUS: Insight (demo killer)
-    if score is None:
-        insight = "No sufficient data"
-    elif score > 75:
+
+    if score > 75:
         insight = "Strong agreement among sources"
     elif score > 50:
-        insight = "Majority of sources agree"
+        insight = "Majority agree"
     elif score > 25:
-        insight = "Mixed or conflicting sources"
+        insight = "Mixed sources"
     else:
-        insight = "Most sources disagree with the claim"
+        insight = "Most sources disagree"
 
     return {
-        "counts": {
-            "agree": agree_count,
-            "disagree": disagree_count,
-            "neutral": neutral_count
-        },
-        "weighted": {
-            "agree": round(weighted_agree, 2),
-            "disagree": round(weighted_disagree, 2),
-            "neutral": round(weighted_neutral, 2)
-        },
         "agreement_score": score,
-        "insight": insight,
-        "type": "hybrid"
+        "insight": insight
     }

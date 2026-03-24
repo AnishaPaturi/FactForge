@@ -1,4 +1,3 @@
-
 import re
 import json
 from app.core.config import OPENROUTER_API_KEY, OPENROUTER_BASE_URL, MODEL_NAME
@@ -17,15 +16,15 @@ def extract_claims(text: str):
         json_data={
             "model": MODEL_NAME,
             "messages": [{"role": "user", "content": prompt}],
+            "max_tokens": 500 
         },
     )
-
+    print("LLM response:", response)
     if not response:
         return []
 
     content = response["choices"][0]["message"]["content"]
 
-    # Extract JSON array from messy LLM output
     try:
         json_match = re.search(r'\[.*\]', content, re.DOTALL)
         if json_match:

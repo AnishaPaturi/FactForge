@@ -1,31 +1,77 @@
+# # from fastapi import FastAPI
+# # from app.api.routes import router
+# # from app.models.db_models import Base
+# # from app.db import Base, engine
+# # from fastapi.middleware.cors import CORSMiddleware
+# # from app.api import auth_routes
+# # from fastapi.responses import StreamingResponse
+# # from app.services.pdf_generator import generate_pdf
+# # from app.api import auth_routes
+
+# # app = FastAPI(title="FactForge API")
+
+# # app.include_router(auth_routes.router)
+
+# # Base.metadata.create_all(bind=engine)
+# # app.include_router(auth_routes.router)
+
+# # app.add_middleware(
+# #     CORSMiddleware,
+# #     allow_origins=["*"],  # allow all for now
+# #     allow_credentials=True,
+# #     allow_methods=["*"],
+# #     allow_headers=["*"],
+# # )
+
+
+# # app.include_router(router)
+
+# # @app.post("/generate-pdf")
+# # def generate_pdf_route(data: dict):
+# #     pdf_buffer = generate_pdf(data)
+
+# #     return StreamingResponse(
+# #         pdf_buffer,
+# #         media_type="application/pdf",
+# #         headers={
+# #             "Content-Disposition": "attachment; filename=FactForge_Report.pdf"
+# #         }
+# #     )
+
+
 # from fastapi import FastAPI
-# from app.api.routes import router
-# from app.models.db_models import Base
-# from app.db import Base, engine
 # from fastapi.middleware.cors import CORSMiddleware
-# from app.api import auth_routes
 # from fastapi.responses import StreamingResponse
-# from app.services.pdf_generator import generate_pdf
+
+# from app.api.routes import router
 # from app.api import auth_routes
+
+# from app.db import Base, engine
+# from app.services.pdf_generator import generate_pdf
 
 # app = FastAPI(title="FactForge API")
 
-# app.include_router(auth_routes.router)
-
+# # ✅ create tables
 # Base.metadata.create_all(bind=engine)
+
+# # ✅ include routes
+# app.include_router(router)
 # app.include_router(auth_routes.router)
 
+# # ✅ CORS
 # app.add_middleware(
 #     CORSMiddleware,
-#     allow_origins=["*"],  # allow all for now
+#     allow_origins=["*"],
 #     allow_credentials=True,
 #     allow_methods=["*"],
 #     allow_headers=["*"],
 # )
 
+# @app.get("/")
+# def root():
+#     return {"message": "API running"}
 
-# app.include_router(router)
-
+# # ✅ PDF route
 # @app.post("/generate-pdf")
 # def generate_pdf_route(data: dict):
 #     pdf_buffer = generate_pdf(data)
@@ -38,35 +84,37 @@
 #         }
 #     )
 
-
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
 
 from app.api.routes import router
 from app.api import auth_routes
-
 from app.db import Base, engine
 from app.services.pdf_generator import generate_pdf
 
 app = FastAPI(title="FactForge API")
 
-# ✅ create tables
+# ✅ Create DB tables
 Base.metadata.create_all(bind=engine)
 
-# ✅ include routes
-app.include_router(router)
-app.include_router(auth_routes.router)
-
-# ✅ CORS
+# ✅ CORS (FIXED PROPERLY)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=[
+        "http://localhost:5173",   # frontend (Vite)
+        "http://127.0.0.1:5173"
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
+# ✅ Routes
+app.include_router(router)
+app.include_router(auth_routes.router)
+
+# ✅ Root check
 @app.get("/")
 def root():
     return {"message": "API running"}

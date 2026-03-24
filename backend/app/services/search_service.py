@@ -27,7 +27,7 @@ def search_claim(claim: str):
             if any(domain in link for domain in bad_domains):
                 continue
 
-            published_date = None  # Tavily doesn't provide it
+            published_date = None
 
             score = CredibilityService.score_source(
                 url=link,
@@ -43,7 +43,6 @@ def search_claim(claim: str):
                 "score": score
             })
 
-       
         results.sort(key=lambda x: x["score"], reverse=True)
 
         return results

@@ -27,6 +27,7 @@ Text:
         json_data={
             "model": MODEL_NAME,
             "messages": [{"role": "user", "content": prompt}],
+            "max_tokens": 500 
         },
     )
 
