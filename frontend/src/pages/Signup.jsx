@@ -240,7 +240,7 @@ export default function Signup() {
         console.error("FULL ERROR:", err);
 
         alert(
-        err.response?.data?.message ||
+        err.response?.data?.detail ||
         err.message ||
         "Signup failed"
         );

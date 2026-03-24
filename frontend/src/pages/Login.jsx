@@ -419,7 +419,7 @@ export default function Login() {
       navigate("/dashboard");
     } catch (error) {
       console.error("Login error:", error);
-      alert("Invalid email or password");
+      alert(error.response?.data?.detail || "Invalid email or password");
     }
 
     setLoading(false);
