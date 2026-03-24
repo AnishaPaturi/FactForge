@@ -9,7 +9,7 @@ const API = axios.create({
 // ✅ LOGIN (CLEAN)
 export const loginUser = async (data) => {
   try {
-    const res = await API.post("/login", data);
+    const res = await API.post("/api/login", data);
     return res.data;
   } catch (err) {
     console.error("Login Error:", err.response?.data || err.message);
@@ -20,7 +20,7 @@ export const loginUser = async (data) => {
 // ✅ REGISTER (CLEAN)
 export const registerUser = async (data) => {
   try {
-    const res = await API.post("/register", data);
+    const res = await API.post("/api/register", data);
     return res.data;
   } catch (err) {
     console.error("Register Error:", err.response?.data || err.message);
@@ -31,7 +31,7 @@ export const registerUser = async (data) => {
 // ✅ ANALYZE TEXT
 export const analyzeText = async (text) => {
   try {
-    const res = await API.post("/analyze", { text });
+    const res = await API.post("/api/analyze", { text });
     return res.data;
   } catch (err) {
     console.error("Analyze Error:", err.response?.data || err.message);
@@ -42,7 +42,7 @@ export const analyzeText = async (text) => {
 // ✅ HISTORY
 export const getHistory = async () => {
   try {
-    const res = await API.get("/history");
+    const res = await API.get("/api/history");
     return res.data;
   } catch (err) {
     console.error("History Error:", err.response?.data || err.message);
