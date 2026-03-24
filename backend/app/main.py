@@ -67,6 +67,10 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+@app.get("/")
+def root():
+    return {"message": "API running"}
+
 # ✅ PDF route
 @app.post("/generate-pdf")
 def generate_pdf_route(data: dict):
