@@ -11,7 +11,7 @@
 
 ## 🚀 Overview
 
-FactForge is an AI-powered fact-checking system that analyzes text or articles, extracts verifiable claims, retrieves real-world evidence, and determines their accuracy.
+FactForge is an **AI-powered fact-checking system** that analyzes text, extracts verifiable claims, retrieves real-world evidence, and determines their accuracy.
 
 It combines **LLMs + real-time search + structured verification** to combat misinformation in a scalable and explainable way.
 
@@ -19,83 +19,75 @@ It combines **LLMs + real-time search + structured verification** to combat misi
 
 ## 🎯 Problem Statement
 
-With the rapid rise of AI-generated content and digital misinformation, manual fact-checking is:
+With the rapid rise of AI-generated content and misinformation:
 
-* ❌ Time-consuming
-* ❌ Not scalable
-* ❌ Prone to human error
+- ❌ Manual fact-checking is time-consuming  
+- ❌ Not scalable  
+- ❌ Prone to human bias  
 
-FactForge automates this entire process using a multi-stage AI pipeline.
+👉 FactForge automates the entire process using a multi-stage AI pipeline.
 
 ---
 
-## ⚙️ Features
+## ⚙️ Key Features
 
 ### 🧩 Claim Extraction
-
-* Extracts atomic, verifiable claims
-* Preserves original wording (no correction bias)
-
----
+- Extracts atomic, verifiable claims from text  
+- Preserves original phrasing  
 
 ### 🔎 Evidence Retrieval
-
-* Uses Tavily API for real-time search
-* Retrieves top relevant sources
-* Filters unreliable domains (Reddit, Facebook, YouTube)
-
----
+- Fetches real-time sources  
+- Filters unreliable domains  
 
 ### 🧪 Verification Engine
+- Classifies claims as:
+  - ✅ True  
+  - ❌ False  
+  - ⚠️ Partially True  
+  - ❓ Unverifiable  
+- Generates:
+  - Confidence score  
+  - Explanation  
 
-* Classifies claims as:
-
-  * ✅ True
-  * ❌ False
-  * ⚠️ Partially True
-  * ❓ Unverifiable
-* Generates:
-
-  * Confidence score
-  * Evidence-based explanation
-
----
+### ⚖️ Bias Detection
+- Classifies claims as Left / Right / Neutral  
 
 ### 🤖 AI Content Detection
+- Detects likelihood of AI-generated text  
 
-* Estimates probability of input being AI-generated
+### 📑 PDF Report Generation
+- Download structured reports  
 
----
+### 🗄️ History Tracking
+- Stores previous results  
 
-### 🗄️ Database Integration
-
-* Stores all verification results using SQLite
-* Supports history retrieval for auditability
-
----
-
-### 🌐 Deployment
-
-* Fully deployed on Render
-* Public API available globally
+### 🔐 Authentication
+- User login & signup  
 
 ---
 
-## 🏗️ Architecture
+## 🏗️ System Architecture
 
-```text
-Input (Text / URL)
-   ↓
-Claim Extraction (LLM)
-   ↓
-Search Agent (Tavily API)
-   ↓
-Verification Agent (LLM)
-   ↓
-Database Storage (SQLite)
-   ↓
-API Response
-```
+
+User Input
+↓
+Claim Extraction
+↓
+Topic Detection
+↓
+Evidence Retrieval
+↓
+Verification Engine
+↓
+Bias + AI Detection
+↓
+Explanation Generation
+↓
+Database Storage → API Response
+
+
+Core pipeline handled in:
+- `backend/app/services/orchestrator.py`
 
 ---
 
@@ -103,244 +95,189 @@ API Response
 
 | Layer      | Technology                    |
 | ---------- | ----------------------------- |
+| Frontend   | React (Vite) + Tailwind CSS   |
 | Backend    | FastAPI (Python)              |
-| LLM        | OpenRouter (GPT-based models) |
+| LLM        | OpenRouter (GPT models)       |
 | Search API | Tavily                        |
-| Database   | SQLite                        |
+| Database   | SQLite (SQLAlchemy)           |
+| Auth       | Passlib (bcrypt)              |
+| Reports    | ReportLab                     |
 | Deployment | Render                        |
 
 ---
 
 ## 📁 Project Structure
 
-```text
+### 🔹 Backend
+
+
 backend/
 │
 ├── app/
-│   ├── api/
-│   │   └── routes.py
-│   │
-│   ├── core/
-│   │   ├── config.py
-│   │   └── constants.py
-│   │
-│   ├── models/
-│   │   ├── db_models.py
-│   │   └── schemas.py
-│   │
-│   ├── prompts/
-│   │   ├── extraction_prompt.txt
-│   │   └── verification_prompt.txt
-│   │
-│   ├── services/
-│   │   ├── ai_detector.py
-│   │   ├── claim_extractor.py
-│   │   ├── db_service.py
-│   │   ├── orchestrator.py
-│   │   ├── search_service.py
-│   │   └── verifier.py
-│   │
-│   ├── utils/
-│   │   ├── helpers.py
-│   │   └── logger.py
-│   │
-│   ├── db.py
-│   └── main.py
+│ ├── api/
+│ │ ├── routes.py
+│ │ └── auth_routes.py
+│ │
+│ ├── core/
+│ │ ├── config.py
+│ │ └── constants.py
+│ │
+│ ├── models/
+│ │ ├── db_models.py
+│ │ └── schemas.py
+│ │
+│ ├── prompts/
+│ │ ├── extraction_prompt.txt
+│ │ └── verification_prompt.txt
+│ │
+│ ├── services/
+│ │ ├── orchestrator.py
+│ │ ├── claim_extractor.py
+│ │ ├── topic_detector.py
+│ │ ├── search_service.py
+│ │ ├── verifier.py
+│ │ ├── bias_indicator.py
+│ │ ├── ai_detector.py
+│ │ ├── credibility_service.py
+│ │ ├── db_service.py
+│ │ ├── pdf_generator.py
+│ │ └── api.js
+│ │
+│ ├── utils/
+│ │ ├── helpers.py
+│ │ └── logger.py
+│ │
+│ ├── db.py
+│ └── main.py
 │
 ├── tests/
-│   ├── conftest.py
-│   ├── test_ai_detector.py
-│   ├── test_claim_extractor.py
-│   ├── test_orchestrator.py
-│   ├── test_search_service.py
-│   └── test_verifier.py
-│
 ├── .env
 ├── fact_checker.db
-├── render.yaml
 ├── requirements.txt
-└── run.py
-```
+├── run.py
+└── render.yaml
+
 
 ---
 
-## 🎨 Frontend (React UI)
+### 🔹 Frontend
 
-The frontend is built using **React + Tailwind CSS**, designed with a clean, modern UI inspired by ChatGPT and Notion.
 
-It provides an interactive interface to:
-- Input text for fact-checking
-- View verification results with explanations
-- Browse past history
-
----
-
-### 📁 Frontend Structure
-
-```text
 frontend/
 │
 ├── src/
-│   ├── components/
-│   │   ├── InputBox.jsx
-│   │   ├── Loader.jsx
-│   │   ├── Navbar.jsx
-│   │   └── ResultCard.jsx
-│   │
-│   ├── pages/
-│   │   ├── Dashboard.jsx
-│   │   ├── History.jsx
-│   │   └── Login.jsx
-│   │
-│   ├── App.jsx
-│   ├── index.css
-│   └── main.jsx
+│ ├── components/
+│ │ ├── AnalyticsPanel.jsx
+│ │ ├── ClaimCard.jsx
+│ │ ├── ClaimsList.jsx
+│ │ ├── ConfidenceChart.jsx
+│ │ ├── Footer.jsx
+│ │ ├── InputBox.jsx
+│ │ ├── Loader.jsx
+│ │ ├── Navbar.jsx
+│ │ ├── ProgressStepper.jsx
+│ │ ├── ResultBreakdownChart.jsx
+│ │ ├── ResultCard.jsx
+│ │ ├── SummaryStats.jsx
+│ │ └── WarningBanner.jsx
+│ │
+│ ├── pages/
+│ │ ├── LandingPage.jsx
+│ │ ├── Login.jsx
+│ │ ├── Signup.jsx
+│ │ ├── Dashboard.jsx
+│ │ └── History.jsx
+│ │
+│ ├── services/
+│ │ └── api.js
+│ │
+│ ├── App.jsx
+│ ├── main.jsx
+│ └── index.css
 │
 ├── index.html
 ├── package.json
+├── vite.config.js
 ├── tailwind.config.js
 ├── postcss.config.js
-└── vite.config.js
+└── .env
+
 
 ---
 
-## ⚡ Installation & Setup
+## 📦 Dependencies
 
-### 1️⃣ Clone the Repository
-
-```bash
-git clone https://github.com/AnishaPaturi/FactForge.git
-cd FactForge
-```
-
----
-
-### 2️⃣ Install Dependencies
+### 🔹 Backend
 
 ```bash
 pip install -r requirements.txt
-```
 
----
+Or manually:
 
-### 3️⃣ Setup Environment Variables
+pip install fastapi uvicorn requests python-dotenv sqlalchemy pydantic reportlab pytz passlib bcrypt==4.0.1
+🔹 Frontend
+npm install
+🔐 Environment Variables
+Backend .env
+OPENROUTER_API_KEY=your_api_key
+OPENROUTER_BASE_URL=https://openrouter.ai/api/v1
+MODEL_NAME=your_model
+TAVILY_API_KEY=your_api_key
+Frontend .env
+VITE_API_URL=http://localhost:8000
+🚀 Running the Project
+1️⃣ Clone Repository
+git clone https://github.com/AnishaPaturi/FactForge.git
+cd FactForge
+2️⃣ Start Backend
+cd backend
+pip install -r requirements.txt
+uvicorn app.main:app --reload
+3️⃣ Start Frontend
+cd frontend
+npm install
+npm run dev
+📡 API Endpoints
+🔐 Auth
+POST /login
+POST /register
+🧠 Core
+POST /analyze
+GET /history
+POST /generate-pdf
+🧪 Example Request
+POST /analyze
 
-Create a `.env` file:
-
-```env
-OPENROUTER_API_KEY=your_key
-TAVILY_API_KEY=your_key
-REACT_APP_API_URL=https://factforge-api.onrender.com
-```
-
----
-
-### 4️⃣ Run the Application
-
-```bash
-python run.py
-```
-
----
-
-## 🌍 Live API
-
-🔗 https://factforge-api.onrender.com
-📄 Docs: https://factforge-api.onrender.com/docs
-
----
-
-## 🧪 API Endpoints
-
-### 🔹 Analyze Text
-
-**POST** `/analyze`
-
-```json
 {
-  "text": "The Earth is flat."
+  "text": "The Earth is flat"
 }
-```
-
----
-
-### 🔹 Get History
-
-**GET** `/history`
-
-Returns previously verified results stored in SQLite.
-
----
-
-## 🧠 Example Output
-
-```text
-Claim: The Earth is flat
-Verdict: False
-Confidence: 95%
-Explanation: Scientific evidence confirms Earth is spherical.
-Sources: Wikipedia, BBC Earth
-```
-
----
-
-## 🧪 Testing
-
-Run all tests:
-
-```bash
+📊 Example Output
+{
+  "topic": "Science",
+  "claims": [
+    {
+      "claim": "The Earth is flat",
+      "verdict": "False",
+      "confidence": 92,
+      "bias": "Neutral"
+    }
+  ]
+}
+🧪 Testing
 pytest -v
-```
-
-Covers:
-
-* Claim extraction
-* Search service
-* Verification logic
-* Orchestrator pipeline
-* AI detection
-
----
-
-## 📊 Evaluation Highlights
-
-* ✔️ Accurate claim extraction
-* ✔️ Evidence-grounded verification
-* ✔️ Explainable AI reasoning
-* ✔️ Multi-agent architecture
-* ✔️ End-to-end tested pipeline
-
----
-
-## 🚧 Limitations
-
-* SQLite is not persistent on cloud restarts
-* Dependent on external APIs
-* Search results may vary
-
----
-
-## 🔮 Future Improvements
-
-* PostgreSQL for persistent storage
-* Frontend UI for visualization
-* Source credibility scoring
-* Image/deepfake detection
-
----
-
-## 👩‍💻 Team
-
-* **Anisha** 
-* **Sravani** 
-* **Jayashree** 
-
----
-
-## 🏆 Conclusion
+⚠️ Limitations
+Depends on external APIs
+SQLite not persistent on cloud restarts
+AI-generated explanations may vary
+🔮 Future Improvements
+PostgreSQL integration
+Better source credibility scoring
+Multi-language support
+Advanced analytics dashboard
+👩‍💻 Team
+Anisha
+Sravani
+Jayashree
+🏆 Conclusion
 
 FactForge demonstrates how AI can be leveraged to build scalable, explainable, and reliable fact-checking systems to combat misinformation in real time.
-
----
-
-⭐ If you found this project useful, consider giving it a star!
